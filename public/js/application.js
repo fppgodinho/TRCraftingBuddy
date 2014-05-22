@@ -1,6 +1,30 @@
 'use strict';
 
+(function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+})(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+ga('create', 'UA-51275210-2', 'darkhounds.net');
+
 var trcraftingbuddy = angular.module('trcraftingbuddy.darkhounds.net', []);
+
+trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', function($rootScope, $location, $window){
+    var analytics   = {};
+
+    analytics.auto  = true;
+    
+    $rootScope.$on('$locationChangeStart', function()                               {
+        if (!analytics.auto) return;
+        analytics.register($location.absUrl());
+    })
+
+    analytics.register = function(path)                                             {
+        $window.ga('send', 'pageview', path);
+    }
+    
+    return analytics
+}])
 
 trcraftingbuddy.directive('viewport', [function()                               {
     return {
@@ -10,7 +34,7 @@ trcraftingbuddy.directive('viewport', [function()                               
         transclude:     true,
         replace:        true,
         templateUrl:    'html/templates/viewport.html',
-        controller:     ['$scope', '$location', 'data', function($scope, $location, data) {
+        controller:     ['$scope', '$location', 'data', 'analytics', function($scope, $location, data, analytics) {
             var updateSelected = false;
             var updateLocation = false;
 
@@ -27,11 +51,15 @@ trcraftingbuddy.directive('viewport', [function()                               
             $scope.item         = false;
             $scope.specie       = false;
             
+            
             function check()                                                    {
                 var ready       = ($scope.skills.length > 0 && $scope.recipes.length > 0 && $scope.components.length > 0 && $scope.filters.length > 0 && $scope.items.length > 0 && $scope.species.length > 0)
                 var firstTime   = (!$scope.ready && ready)
                 $scope.ready    = ready;
-                if (firstTime) updateSelected = true;
+                if (firstTime)                                                  {
+                    checkStore();
+                    updateSelected = true;
+                }
             }
             
             $scope.skills       = [];
@@ -89,6 +117,9 @@ trcraftingbuddy.directive('viewport', [function()                               
                     case 'specie':      $scope.specie       = $scope.getSpecie(params.id || 1);     break;
                     default:            $scope.skill        = $scope.getSkill(params.id || 1);      break;
                 }
+
+                    
+                
                 
                 $scope.$apply();
             }
@@ -216,6 +247,32 @@ trcraftingbuddy.directive('viewport', [function()                               
                         if (list[i].name.toLowerCase().indexOf(searchValue.toLowerCase()) >= 0)
                             $scope[model] = list[i];
             }
+            
+            
+            var checkInitialized = false;
+            function checkStore()                                               {
+                checkInitialized = true;
+                var params = $location.search();
+                var pairs = params.store.split(',');
+                for (var i in pairs)                                            {
+                    var pair = pairs[i].split(':');
+                    switch(pair[0])                                             {
+                        case 'skill':       $scope.stored.push({type: pair[0], item: $scope.getSkill(pair[1])}); break;
+                        case 'recipe':      $scope.stored.push({type: pair[0], item: $scope.getRecipe(pair[1])}); break;
+                        case 'component':   $scope.stored.push({type: pair[0], item: $scope.getComponent(pair[1])}); break;
+                        case 'filter':      $scope.stored.push({type: pair[0], item: $scope.getFilter(pair[1])}); break;
+                        case 'item':        $scope.stored.push({type: pair[0], item: $scope.getItem(pair[1])}); break;
+                        default: break;
+                    }
+                }
+            }
+            $scope.$watch('stored', function(nv)                                {
+                if (!checkInitialized) return;
+                var params  = $location.search();
+                params.store   = '';
+                if (nv) for (var i in nv) params.store += (params.store?',':'') + nv[i].type +':'+ nv[i].item.id
+                $location.search(params);
+            }, true)
             
             $scope.store = function (type, item)                                {
                 if (!type || !item) return;
