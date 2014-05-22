@@ -8,7 +8,9 @@ trcraftingbuddy.directive('viewport', [function()                               
         templateUrl:    'html/templates/viewport.html',
         controller:     ['$scope', '$location', 'data', function($scope, $location, data) {
             $scope.ready        = false;
-            $scope.type         = false;
+            $scope.type         = $location.search().type || 'skill';
+            $scope.id           = $location.search().id || 1;
+            
             $scope.skill        = false;
             $scope.recipe       = false;
             $scope.component    = false;
@@ -17,70 +19,80 @@ trcraftingbuddy.directive('viewport', [function()                               
             $scope.specie       = false;
             
             function check()                                                    {
-                $scope.ready        = ($scope.skills.length > 0 && $scope.recipes.length > 0 && $scope.components.length > 0 && $scope.filters.length > 0 && $scope.items.length > 0 && $scope.species.length > 0)
+                var ready       = ($scope.skills.length > 0 && $scope.recipes.length > 0 && $scope.components.length > 0 && $scope.filters.length > 0 && $scope.items.length > 0 && $scope.species.length > 0)
+                var firstTime   = (!$scope.ready && ready)
+                $scope.ready    = ready;
+                if (firstTime) updateSelected();
             }
 
             $scope.skills       = [];
             $scope.$watch(function(){ return data.skills}, function(nv)         {
                 $scope.skills.length = 0;
                 for (var id in nv) $scope.skills.push(nv[id]);
-                $scope.skill    = $scope.skills[0]; 
+                // $scope.skill    = $scope.skills[0]; 
                 check()
             });
             $scope.recipes      = [];
             $scope.$watch(function(){ return data.recipes}, function(nv)        {
                 $scope.recipes.length = 0;
                 for (var id in nv) $scope.recipes.push(nv[id]);
-                $scope.recipe   = $scope.recipes[0];
+                // $scope.recipe   = $scope.recipes[0];
                 check()
             });
             $scope.components   = [];
             $scope.$watch(function(){ return data.components}, function(nv)     {
                 $scope.components.length = 0;
                 for (var id in nv) $scope.components.push(nv[id]);
-                $scope.component = $scope.components[0];
+                // $scope.component = $scope.components[0];
                 check()
             });
             $scope.filters        = [];
             $scope.$watch(function(){ return data.filters}, function(nv)        {
                 $scope.filters.length = 0;
                 for (var id in nv) $scope.filters.push(nv[id]);
-                $scope.filter   = $scope.filters[0];
+                // $scope.filter   = $scope.filters[0];
                 check()
             });
             $scope.items        = [];
             $scope.$watch(function(){ return data.items}, function(nv)          {
                 $scope.items.length = 0;
                 for (var id in nv) $scope.items.push(nv[id]);
-                $scope.item     = $scope.items[0];
+                // $scope.item     = $scope.items[0];
                 check()
             });
             $scope.species      = [];
             $scope.$watch(function(){ return data.species}, function(nv)        {
                 $scope.species.length = 0;
                 for (var id in nv) $scope.species.push(nv[id]);
-                $scope.specie   = $scope.species[0];
+                // $scope.specie   = $scope.species[0];
                 check()
             });
 
-            $scope.$watch(function(){ return $location.search() }, function(nv) {
-                if (!nv || !nv.type) return;
-                $scope.type = nv.type;
-                switch (nv.type)                                                {
-                    case 'recipe':      $scope.getRecipe(nv.id || 1);       break;
-                    case 'component':   $scope.getComponent(nv.id || 1);    break;
-                    case 'filter':      $scope.getFilter(nv.id || 1);       break;
-                    case 'item':        $scope.getItem(nv.id || 1);         break;
-                    case 'specie':      $scope.getSpecie(nv.id || 1);       break;
-                    default:            $scope.getSkill(nv.id || 1);        break;
-                }
+            $scope.$watch(function(){ return $location.search(); }, function(nv) {
+                updateSelected();
             });
             
-            
-            $scope.$watch('type', function(nv)                                  {
+            function updateSelected()                                           {
+                console.log('Hummmmm');
                 var params  = $location.search();
-                params.type = nv;
-                switch (nv)                                                     {
+                if (!$scope.ready || !params || !params.type) return;
+                $scope.type = params.type;
+                switch (params.type)                                            {
+                    case 'recipe':      $scope.recipe       = $scope.getRecipe(params.id || 1);     break;
+                    case 'component':   $scope.component    = $scope.getComponent(params.id || 1);  break;
+                    case 'filter':      $scope.filter       = $scope.getFilter(params.id || 1);     break;
+                    case 'item':        $scope.item         = $scope.getItem(params.id || 1);       break;
+                    case 'specie':      $scope.specie       = $scope.getSpecie(params.id || 1);     break;
+                    default:            $scope.skill        = $scope.getSkill(params.id || 1);      break;
+                }
+                console.log('doooiisss', params.type, params.id, $scope.recipe);
+            }
+            
+            function updateLocation()                                          {
+                if (!$scope.ready) return;
+                var params  = $location.search();
+                params.type = $scope.type;
+                switch ($scope.type)                                            {
                     case 'skill':       params.id = $scope.skill?$scope.skill.id:'';            break;
                     case 'recipe':      params.id = $scope.recipe?$scope.recipe.id:'';          break;
                     case 'component':   params.id = $scope.component?$scope.component.id:'';    break;
@@ -89,10 +101,38 @@ trcraftingbuddy.directive('viewport', [function()                               
                     case 'specie':      params.id = $scope.specie?$scope.specie.id:'';          break;
                     default: break;
                 }
-                
                 $location.search(params);
+            }
+            $scope.$watch('type', function(nv)                                  {
+                updateLocation();
             });
-
+            $scope.$watch('skill', function(nv)                                 {
+                updateLocation();
+            });
+            $scope.$watch('recipe', function(nv)                                {
+                updateLocation();
+            });
+            $scope.$watch('component', function(nv)                             {
+                updateLocation();
+            });
+            $scope.$watch('filter', function(nv)                                {
+                updateLocation();
+            });
+            $scope.$watch('item', function(nv)                                  {
+                updateLocation();
+            });
+            $scope.$watch('specie', function(nv)                                {
+                updateLocation();
+            });
+            
+            
+            
+            
+            
+            
+            
+            
+            
             $scope.getSkill             = function(id)                          {
                 for (var i in $scope.skills)
                     if ($scope.skills[i].id == id) return $scope.skills[i];

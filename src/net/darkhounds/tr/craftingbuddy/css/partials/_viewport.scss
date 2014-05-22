@@ -8,6 +8,7 @@
   
   .column                                                                       {
     display: inline-block;
+    @include ellipsis(no-wrap);
   }
   
   
@@ -23,8 +24,6 @@
       margin:         1px;
       
       .list                                                                     {
-        display:        inline-flex;
-        flex-direction: column;
         max-height:     150px;
         overflow-y:     auto;
       }

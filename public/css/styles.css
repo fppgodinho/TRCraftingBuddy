@@ -15,7 +15,12 @@ html, body {
     text-overflow: ellipsis;
     margin: 2px; }
   .viewport .column {
-    display: inline-block; }
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    -ms-text-overflow: ellipsis;
+    -o-text-overflow: ellipsis;
+    text-overflow: ellipsis; }
   .viewport .panel {
     display: inline-flex;
     flex-direction: row; }
@@ -26,8 +31,6 @@ html, body {
       border: solid #000 1px;
       margin: 1px; }
       .viewport .panel .block .list {
-        display: inline-flex;
-        flex-direction: column;
         max-height: 150px;
         overflow-y: auto; }
   .viewport button {
