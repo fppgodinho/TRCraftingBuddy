@@ -11,6 +11,11 @@ trcraftingbuddy.directive('viewport', [function()                               
         replace:        true,
         templateUrl:    'html/templates/viewport.html',
         controller:     ['$scope', '$location', 'data', function($scope, $location, data) {
+            var updateSelected = false;
+            var updateLocation = false;
+
+            $scope.stored       = [];
+            
             $scope.ready        = false;
             $scope.type         = $location.search().type || 'skill';
             $scope.id           = $location.search().id || 1;
@@ -26,60 +31,55 @@ trcraftingbuddy.directive('viewport', [function()                               
                 var ready       = ($scope.skills.length > 0 && $scope.recipes.length > 0 && $scope.components.length > 0 && $scope.filters.length > 0 && $scope.items.length > 0 && $scope.species.length > 0)
                 var firstTime   = (!$scope.ready && ready)
                 $scope.ready    = ready;
-                if (firstTime) updateSelected();
+                if (firstTime) updateSelected = true;
             }
-
+            
             $scope.skills       = [];
             $scope.$watch(function(){ return data.skills}, function(nv)         {
-                $scope.skills.length = 0;
+                $scope.skills.length    = 0;
                 for (var id in nv) $scope.skills.push(nv[id]);
-                // $scope.skill    = $scope.skills[0]; 
                 check()
             });
             $scope.recipes      = [];
             $scope.$watch(function(){ return data.recipes}, function(nv)        {
                 $scope.recipes.length = 0;
                 for (var id in nv) $scope.recipes.push(nv[id]);
-                // $scope.recipe   = $scope.recipes[0];
                 check()
             });
             $scope.components   = [];
             $scope.$watch(function(){ return data.components}, function(nv)     {
-                $scope.components.length = 0;
+                $scope.components.length    = 0;
                 for (var id in nv) $scope.components.push(nv[id]);
-                // $scope.component = $scope.components[0];
                 check()
             });
             $scope.filters        = [];
             $scope.$watch(function(){ return data.filters}, function(nv)        {
                 $scope.filters.length = 0;
                 for (var id in nv) $scope.filters.push(nv[id]);
-                // $scope.filter   = $scope.filters[0];
                 check()
             });
             $scope.items        = [];
             $scope.$watch(function(){ return data.items}, function(nv)          {
-                $scope.items.length = 0;
+                $scope.items.length         = 0;
                 for (var id in nv) $scope.items.push(nv[id]);
-                // $scope.item     = $scope.items[0];
                 check()
             });
             $scope.species      = [];
             $scope.$watch(function(){ return data.species}, function(nv)        {
                 $scope.species.length = 0;
                 for (var id in nv) $scope.species.push(nv[id]);
-                // $scope.specie   = $scope.species[0];
                 check()
             });
 
             $scope.$watch(function(){ return $location.search(); }, function(nv) {
-                updateSelected();
+                updateSelected = true;
             });
-            
-            function updateSelected()                                           {
-                console.log('Hummmmm');
+
+            setInterval(executeUpdateSelected, 100);
+            function executeUpdateSelected()                                    {
                 var params  = $location.search();
-                if (!$scope.ready || !params || !params.type) return;
+                if (!$scope.ready || !params || !params.type || !updateSelected) return; updateSelected = false;
+                
                 $scope.type = params.type;
                 switch (params.type)                                            {
                     case 'recipe':      $scope.recipe       = $scope.getRecipe(params.id || 1);     break;
@@ -89,11 +89,13 @@ trcraftingbuddy.directive('viewport', [function()                               
                     case 'specie':      $scope.specie       = $scope.getSpecie(params.id || 1);     break;
                     default:            $scope.skill        = $scope.getSkill(params.id || 1);      break;
                 }
-                console.log('doooiisss', params.type, params.id, $scope.recipe);
+                
+                $scope.$apply();
             }
             
-            function updateLocation()                                          {
-                if (!$scope.ready) return;
+            setInterval(executeUpdateLocation, 100);
+            function executeUpdateLocation()                                    {
+                if (!$scope.ready || !updateLocation) return; updateLocation = false;
                 var params  = $location.search();
                 params.type = $scope.type;
                 switch ($scope.type)                                            {
@@ -106,40 +108,32 @@ trcraftingbuddy.directive('viewport', [function()                               
                     default: break;
                 }
                 $location.search(params);
+                $scope.$apply();
             }
             $scope.$watch('type', function(nv)                                  {
-                updateLocation();
+                updateLocation = true;
             });
             $scope.$watch('skill', function(nv)                                 {
-                updateLocation();
+                updateLocation = true;
             });
             $scope.$watch('recipe', function(nv)                                {
-                updateLocation();
+                updateLocation = true;
             });
             $scope.$watch('component', function(nv)                             {
-                updateLocation();
+                updateLocation = true;
             });
             $scope.$watch('filter', function(nv)                                {
-                updateLocation();
+                updateLocation = true;
             });
             $scope.$watch('item', function(nv)                                  {
-                updateLocation();
+                updateLocation = true;
             });
             $scope.$watch('specie', function(nv)                                {
-                updateLocation();
+                updateLocation = true;
             });
             
-            
-            
-            
-            
-            
-            
-            
-            
             $scope.getSkill             = function(id)                          {
-                for (var i in $scope.skills)
-                    if ($scope.skills[i].id == id) return $scope.skills[i];
+                for (var i in $scope.skills) if ($scope.skills[i].id == id) return $scope.skills[i];
                 return {};
             }
             $scope.getSkillName         = function (id)                         {
@@ -152,8 +146,7 @@ trcraftingbuddy.directive('viewport', [function()                               
             }
             
             $scope.getRecipe            = function(id)                          {
-                for (var i in $scope.recipes)
-                    if ($scope.recipes[i].id == id) return $scope.recipes[i];
+                for (var i in $scope.recipes) if ($scope.recipes[i].id == id) return $scope.recipes[i];
                 return {};
             }
             $scope.getRecipeName        = function (id)                         {
@@ -166,8 +159,7 @@ trcraftingbuddy.directive('viewport', [function()                               
             }
             
             $scope.getComponent             = function(id)                      {
-                for (var i in $scope.components)
-                    if ($scope.components[i].id == id) return $scope.components[i];
+                for (var i in $scope.components) if ($scope.components[i].id == id) return $scope.components[i];
                 return {};
             }
             $scope.getComponentName         = function (id)                     {
@@ -180,8 +172,7 @@ trcraftingbuddy.directive('viewport', [function()                               
             }
             
             $scope.getFilter              = function(id)                        {
-                for (var i in $scope.filters)
-                    if ($scope.filters[i].id == id) return $scope.filters[i];
+                for (var i in $scope.filters) if ($scope.filters[i].id == id) return $scope.filters[i];
                 return {};
             }
             $scope.getFilterName          = function (id)                       {
@@ -194,8 +185,7 @@ trcraftingbuddy.directive('viewport', [function()                               
             }
 
             $scope.getItem              = function(id)                          {
-                for (var i in $scope.items)
-                    if ($scope.items[i].id == id) return $scope.items[i];
+                for (var i in $scope.items) if ($scope.items[i].id == id) return $scope.items[i];
                 return {};
             }
             $scope.getItemName          = function (id)                         {
@@ -208,8 +198,7 @@ trcraftingbuddy.directive('viewport', [function()                               
             }
 
             $scope.getSpecie              = function(id)                        {
-                for (var i in $scope.species)
-                    if ($scope.species[i].id == id) return $scope.species[i];
+                for (var i in $scope.species) if ($scope.species[i].id == id) return $scope.species[i];
                 return {};
             }
             $scope.getSpecieName          = function (id)                       {
@@ -220,7 +209,31 @@ trcraftingbuddy.directive('viewport', [function()                               
                 var item = $scope.getSpecie(id)
                 return item.description || '';
             }
-
+            
+            $scope.search = function (model, list, searchValue)                 {
+                if (model && list && list.length)
+                    for (var i in list)
+                        if (list[i].name.toLowerCase().indexOf(searchValue.toLowerCase()) >= 0)
+                            $scope[model] = list[i];
+            }
+            
+            $scope.store = function (type, item)                                {
+                if (!type || !item) return;
+                var element = {type: type, item: item };
+                
+                element.view   = function()                                     {
+                    $scope.type         = type;
+                    $scope[$scope.type] = item;
+                }
+                
+                element.remove = function ()                                    {
+                    var index = $scope.stored.indexOf(element);
+                    if (index < 0) return;
+                    $scope.stored.splice(index, 1);
+                }
+                
+                $scope.stored.push(element);
+            }
         }]
     };
 }]);

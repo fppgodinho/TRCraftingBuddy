@@ -7,25 +7,35 @@
   }
   
   .column                                                                       {
-    display: inline-block;
     @include ellipsis(no-wrap);
+    display:        inline-block;
+    vertical-align: text-bottom;
   }
   
+  .header                                                                       {
+    select{
+      width: 300px;
+    }
+    input{
+      width: 300px;
+    }
+  }
   
   .panel                                                                        {
     display:        inline-flex;
     flex-direction: row;
+    height:       170px;
     
     .block                                                                      {
       display:        inline-flex;
       flex-direction: column;
-      width:          220px;
+      width:          280px;
       border:         solid #000 1px;
       margin:         1px;
       
       .list                                                                     {
-        max-height:     150px;
-        overflow-y:     auto;
+        height:       150px;
+        overflow-y:   auto;
       }
     }
     

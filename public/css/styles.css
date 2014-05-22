@@ -15,23 +15,29 @@ html, body {
     text-overflow: ellipsis;
     margin: 2px; }
   .viewport .column {
-    display: inline-block;
     white-space: nowrap;
     overflow: hidden;
     -ms-text-overflow: ellipsis;
     -o-text-overflow: ellipsis;
-    text-overflow: ellipsis; }
+    text-overflow: ellipsis;
+    display: inline-block;
+    vertical-align: text-bottom; }
+  .viewport .header select {
+    width: 300px; }
+  .viewport .header input {
+    width: 300px; }
   .viewport .panel {
     display: inline-flex;
-    flex-direction: row; }
+    flex-direction: row;
+    height: 170px; }
     .viewport .panel .block {
       display: inline-flex;
       flex-direction: column;
-      width: 220px;
+      width: 280px;
       border: solid #000 1px;
       margin: 1px; }
       .viewport .panel .block .list {
-        max-height: 150px;
+        height: 150px;
         overflow-y: auto; }
   .viewport button {
     margin: 2px; }

@@ -7,45 +7,67 @@
     </div>
     
     <div data-ng-show="type=='skill'">
-        <div>
+        <div class="header">
             <div class="field">Skills: {{skills.length}}</div>
-            <select data-ng-model="skill" data-ng-options="item.name for item in skills | orderBy:'name'""></select>
+            <select data-ng-model="skill" data-ng-options="item.name for item in skills | orderBy:'name' | filter:{name:skillSearch}""></select>
+            <input data-ng-model="skillSearch" data-ng-change="search('skill', skills, skillSearch)" placeholder="filter" />
+            <button data-ng-disabled="!skill" data-ng-click="store('skill', skill)">store</button>
         </div>
-        <div data-ng-show="skill">
+        <div style="height:75px">
             <div class="field">ID: {{skill.id}}</div>
             <div class="field">Description: {{skill.description}}</div>
         </div>
-        <div class="panel" data-ng-show="skill">
+        <div class="panel">
             <div class="block">
-                <div class="field">Recipes: {{recipe.recipes.length}}</div>
+                <div class="field">Recipes: {{skill.recipes.length}}</div>
                 <div class="list">
-                    <div><div class="field" data-ng-repeat="item in skill.recipes | orderBy:getRecipeName"><button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>{{getRecipeName(item)}}</div></div>
+                    <div>
+                        <div class="field" data-ng-repeat="id in skill.recipes | orderBy:getRecipeName">
+                            <button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(id)">view</button>
+                            <button data-ng-click="$parent.store('recipe', $parent.getRecipe(id))">store</button>
+                            {{getRecipeName(id)}}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
     <div data-ng-show="type=='recipe'">
-        <div>
+        <div class="header">
             <div class="field">Recipes: {{recipes.length}}</div>
-            <select data-ng-model="recipe" data-ng-options="item.name for item in recipes | orderBy:'name'"></select>
+            <select data-ng-model="recipe" data-ng-options="item.name for item in recipes | orderBy:'name' | filter:{name:recipeSearch}"></select>
+            <input data-ng-model="recipeSearch" data-ng-change="search('recipe', recipes, recipeSearch)" placeholder="filter" />
+            <button data-ng-disabled="!recipe" data-ng-click="store('recipe', recipe)">store</button>
         </div>
-        <div data-ng-show="recipe">
+        <div style="height:75px">
             <div class="field">ID: {{recipe.id}}</div>
             <div class="field">Description: {{recipe.description}}</div>
             <div class="field">Skill: {{getSkill(recipe.skill).name}}<button data-ng-click="type='skill';skill=getSkill(recipe.skill)">view</button></div>
         </div>
-        <div class="panel" data-ng-show="recipe">
+        <div class="panel">
             <div class="block">
                 <div class="field">Ingredients: {{recipe.ingredients.length}}</div>
                 <div class="list">
-                    <div><div class="field" data-ng-repeat="item in recipe.ingredients | orderBy:getComponentName"><button data-ng-click="$parent.type='component';$parent.component=$parent.getComponent(item)">view</button>{{getComponentName(item)}}</div></div>
+                    <div>
+                        <div class="field" data-ng-repeat="item in recipe.ingredients | orderBy:getComponentName">
+                            <button data-ng-click="$parent.type='component';$parent.component=$parent.getComponent(item)">view</button>
+                            <button data-ng-click="store('component', $parent.getComponent(item))" data-ng-disabled="!item" >store</button>
+                            {{getComponentName(item)}}
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="block">
                 <div class="field">Agents: {{recipe.agents.length}}</div>
                 <div class="list">
-                    <div><div class="field" data-ng-repeat="item in recipe.agents | orderBy:getComponentName"><button data-ng-click="$parent.type='component';$parent.component=$parent.getComponent(item)">view</button>{{getComponentName(item)}}</div></div>
+                    <div>
+                        <div class="field" data-ng-repeat="item in recipe.agents | orderBy:getComponentName">
+                            <button data-ng-click="$parent.type='component';$parent.component=$parent.getComponent(item)">view</button>
+                            <button data-ng-click="store('component', $parent.getComponent(item))" data-ng-disabled="!item" >store</button>
+                            {{getComponentName(item)}}
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="block" style="width: 700px">
@@ -54,6 +76,7 @@
                     <div>
                         <div class="field" data-ng-repeat="item in recipe.results">
                             <button data-ng-click="$parent.type='item';$parent.item=$parent.getItem(item.id)">view</button>
+                            <button data-ng-click="store('item', $parent.getItem(item.id))" data-ng-disabled="!item" >store</button>
                             <div class="column" style="width: 200px">{{getItemName(item.id)}}</div>
                             <div class="column" style="width: 20px">{{item.count}}</div>
                             <div class="column" style="width: 20px">{{item.quality}}</div>
@@ -70,62 +93,102 @@
     </div>
     
     <div data-ng-show="type=='component'">
-        <div>
+        <div class="header">
             <div class="field">Components: {{components.length}}</div>
-            <select data-ng-model="component" data-ng-options="item.name for item in components | orderBy:'name'"></select>
+            <select data-ng-model="component" data-ng-options="item.name for item in components | orderBy:'name' | filter:{name:componentSearch}"></select>
+            <input data-ng-model="componentSearch" data-ng-change="search('component', components, componentSearch)" placeholder="filter" />
+            <button data-ng-disabled="!component" data-ng-click="store('component', component)">store</button>
         </div>
-        <div data-ng-show="component">
+        <div style="height:75px">
             <div class="field">ID: {{component.id}}</div>
             <div class="field">Description: {{component.description}}</div>
         </div>
-        <div class="panel" data-ng-show="component">
+        <div class="panel">
             <div class="block">
                 <div class="field">Items: {{component.items.length}}</div>
                 <div class="list">
-                    <div><div class="field" data-ng-repeat="item in component.items | orderBy:getItemName"><button data-ng-click="$parent.type='item';$parent.item=$parent.getItem(item)">view</button>{{getItemName(item)}}</div></div>
+                    <div>
+                        <div class="field" data-ng-repeat="item in component.items | orderBy:getItemName">
+                            <button data-ng-click="$parent.type='item';$parent.item=$parent.getItem(item)">view</button>
+                            <button data-ng-click="store('item', $parent.getItem(item))" data-ng-disabled="!item" >store</button>
+                            {{getItemName(item)}}
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="block">
                 <div class="field">Ingredient Of: {{component.ingredientOf.length}}</div>
                 <div class="list">
-                    <div><div class="field" data-ng-repeat="item in component.ingredientOf | orderBy:getRecipeName"><button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>{{getRecipeName(item)}}</div></div>
+                    <div>
+                        <div class="field" data-ng-repeat="item in component.ingredientOf | orderBy:getRecipeName">
+                            <button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>
+                            <button data-ng-click="store('recipe', $parent.getRecipe(item))" data-ng-disabled="!item" >store</button>
+                            {{getRecipeName(item)}}
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="block">
                 <div class="field">Agent Of: {{component.agentsOf.length}}</div>
                 <div class="list">
-                    <div><div class="list" data-ng-repeat="item in component.agentOf | orderBy:getRecipeName"><button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>{{getRecipeName(item)}}</div></div>
+                    <div>
+                        <div class="list" data-ng-repeat="item in component.agentOf | orderBy:getRecipeName">
+                            <button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>
+                            <button data-ng-click="store('recipe', $parent.getRecipe(item))" data-ng-disabled="!item" >store</button>
+                            {{getRecipeName(item)}}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
     
     <div data-ng-show="type=='item'">
-        <div>
+        <div class="header">
             <div class="field">Items: {{items.length}}</div>
-            <select data-ng-model="item" data-ng-options="item.name for item in items |  orderBy:'name'"></select>
+            <select data-ng-model="item" data-ng-options="item.name for item in items |  orderBy:'name' | filter:{name:itemSearch}"></select>
+            <input data-ng-model="itemSearch" data-ng-change="search('item', items, itemSearch)" placeholder="filter" />
+            <button data-ng-disabled="!item" data-ng-click="store('item', item)">store</button>
         </div>
-        <div data-ng-show="item">
+        <div style="height:75px">
             <div class="field">ID: {{item.id}}</div>
             <div class="field">Description: {{item.description}}</div>
         </div>
-        <div class="panel" data-ng-show="item">
+        <div class="panel">
             <div class="block">
                 <div class="field">Result Of: {{item.resultOf.length}}</div>
                 <div class="list">
-                    <div><div class="field" data-ng-repeat="item in item.resultOf | orderBy:getRecipeName"><button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>{{getRecipeName(item)}}</div></div>
+                    <div>
+                        <div class="field" data-ng-repeat="item in item.resultOf | orderBy:getRecipeName">
+                            <button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>
+                            <button data-ng-click="store('recipe', $parent.getRecipe(item))" data-ng-disabled="!item" >store</button>
+                            {{getRecipeName(item)}}
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="block">
                 <div class="field">Used In: {{item.usedIn.length}}</div>
                 <div class="list">
-                    <div><div class="field" data-ng-repeat="item in item.usedIn | orderBy:getRecipeName"><button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>{{getRecipeName(item)}}</div></div>
+                    <div>
+                        <div class="field" data-ng-repeat="item in item.usedIn | orderBy:getRecipeName">
+                            <button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>
+                            <button data-ng-click="store('recipe', $parent.getRecipe(item))" data-ng-disabled="!item" >store</button>
+                            {{getRecipeName(item)}}
+                        </div>
+                    </div>
                 </div>
             </div>
             <div class="block">
                 <div class="field">Components: {{item.components.length}}</div>
                 <div class="list">
-                    <div><div class="field" data-ng-repeat="item in item.components | orderBy:getComponentName"><button data-ng-click="$parent.type='component';$parent.component=$parent.getComponent(item)">view</button>{{getComponentName(item)}}</div></div>
+                    <div>
+                        <div class="field" data-ng-repeat="item in item.components | orderBy:getComponentName">
+                            <button data-ng-click="$parent.type='component';$parent.component=$parent.getComponent(item)">view</button>
+                            <button data-ng-click="store('component', $parent.getComponent(item))" data-ng-disabled="!item" >store</button>
+                            {{getComponentName(item)}}
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -135,4 +198,22 @@
         <div>Species: {{species.length}}</div>
         <select data-ng-model="specie" data-ng-options="item.name for item in species"></select>
     </div>
+    
+    <div>
+        <div class="header">
+            <div>Stored:</div>
+        </div>
+        <div class="list">
+            <div>
+                <div data-ng-repeat="element in stored" class="field">
+                    <button data-ng-click="element.view()">view</button>
+                    <button data-ng-click="element.remove()">Remove</button>
+                    <div class="column" style="width: 80px">{{element.type}}</div>
+                    {{element.item.name}}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    
 </div>
