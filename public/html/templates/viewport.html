@@ -80,6 +80,12 @@
         </div>
         <div class="panel" data-ng-show="component">
             <div class="block">
+                <div class="field">Items: {{component.items.length}}</div>
+                <div class="list">
+                    <div><div class="field" data-ng-repeat="item in component.items | orderBy:getItemName"><button data-ng-click="$parent.type='item';$parent.item=$parent.getItem(item)">view</button>{{getItemName(item)}}</div></div>
+                </div>
+            </div>
+            <div class="block">
                 <div class="field">Ingredient Of: {{component.ingredientOf.length}}</div>
                 <div class="list">
                     <div><div class="field" data-ng-repeat="item in component.ingredientOf | orderBy:getRecipeName"><button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>{{getRecipeName(item)}}</div></div>
@@ -89,12 +95,6 @@
                 <div class="field">Agent Of: {{component.agentsOf.length}}</div>
                 <div class="list">
                     <div><div class="list" data-ng-repeat="item in component.agentOf | orderBy:getRecipeName"><button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>{{getRecipeName(item)}}</div></div>
-                </div>
-            </div>
-            <div class="block">
-                <div class="field">Items: {{component.items.length}}</div>
-                <div class="list">
-                    <div><div class="field" data-ng-repeat="item in component.items | orderBy:getItemName"><button data-ng-click="$parent.type='item';$parent.item=$parent.getItem(item)">view</button>{{getItemName(item)}}</div></div>
                 </div>
             </div>
         </div>
@@ -111,12 +111,6 @@
         </div>
         <div class="panel" data-ng-show="item">
             <div class="block">
-                <div class="field">Components: {{item.components.length}}</div>
-                <div class="list">
-                    <div><div class="field" data-ng-repeat="item in item.components | orderBy:getComponentName"><button data-ng-click="$parent.type='component';$parent.component=$parent.getComponent(item)">view</button>{{getComponentName(item)}}</div></div>
-                </div>
-            </div>
-            <div class="block">
                 <div class="field">Result Of: {{item.resultOf.length}}</div>
                 <div class="list">
                     <div><div class="field" data-ng-repeat="item in item.resultOf | orderBy:getRecipeName"><button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>{{getRecipeName(item)}}</div></div>
@@ -126,6 +120,12 @@
                 <div class="field">Used In: {{item.usedIn.length}}</div>
                 <div class="list">
                     <div><div class="field" data-ng-repeat="item in item.usedIn | orderBy:getRecipeName"><button data-ng-click="$parent.type='recipe';$parent.recipe=$parent.getRecipe(item)">view</button>{{getRecipeName(item)}}</div></div>
+                </div>
+            </div>
+            <div class="block">
+                <div class="field">Components: {{item.components.length}}</div>
+                <div class="list">
+                    <div><div class="field" data-ng-repeat="item in item.components | orderBy:getComponentName"><button data-ng-click="$parent.type='component';$parent.component=$parent.getComponent(item)">view</button>{{getComponentName(item)}}</div></div>
                 </div>
             </div>
         </div>
