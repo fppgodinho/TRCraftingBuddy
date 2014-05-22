@@ -1,3 +1,3 @@
 'use strict';
 
-var aethernauts = angular.module('trcraftingbuddy.darkhounds.net', []);
+var trcraftingbuddy = angular.module('trcraftingbuddy.darkhounds.net', []);

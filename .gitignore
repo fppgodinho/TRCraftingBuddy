@@ -31,6 +31,6 @@ node_modules
 .sass-cache
 
 #Generated Files
-public/index.html
-public/js
-public/html
+#public/index.html
+#public/js
+#public/html

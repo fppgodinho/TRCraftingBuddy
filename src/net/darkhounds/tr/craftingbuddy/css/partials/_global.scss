@@ -6,3 +6,8 @@ html, body                                                                      
     height:     100%;
 }
 
+button:disabled {
+  border:     none;
+  background: none;
+}
+
