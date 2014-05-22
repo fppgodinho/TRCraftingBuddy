@@ -12,11 +12,15 @@ trcraftingbuddy.service('data', ['$http', function($http)                       
     $http({method: 'GET', url: 'data/components.json'}).success(function(data)  {
         service.components  = data;
     });
-    
+
+    $http({method: 'GET', url: 'data/filters.json'}).success(function(data)     {
+        service.filters     = data;
+    });
+
     $http({method: 'GET', url: 'data/items.json'}).success(function(data)       {
         service.items       = data;
     });
-    
+
     $http({method: 'GET', url: 'data/species.json'}).success(function(data)     {
         service.species     = data;
     });

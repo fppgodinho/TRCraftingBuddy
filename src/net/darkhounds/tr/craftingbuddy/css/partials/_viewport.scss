@@ -1,2 +1,44 @@
 .viewport                                                                       {
+  padding: 5px;
+  
+  .field                                                                        {
+    @include ellipsis(no-wrap);
+    margin: 2px;
+  }
+  
+  .column                                                                       {
+    display: inline-block;
+  }
+  
+  
+  .panel                                                                        {
+    display:        inline-flex;
+    flex-direction: row;
+    
+    .block                                                                      {
+      display:        inline-flex;
+      flex-direction: column;
+      width:          200px;
+      border:         solid #000 1px;
+      margin:         1px;
+      
+      .list                                                                     {
+        display:        inline-flex;
+        flex-direction: column;
+        max-height:     150px;
+        overflow-y:     auto;
+      }
+    }
+    
+  }
+
+  button                                                                        {
+    margin:     2px;
+  }
+  
+  button:disabled                                                               {
+    border:     none;
+    background: none;
+  }
+  
 }

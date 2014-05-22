@@ -34,3 +34,4 @@ node_modules
 #public/index.html
 #public/js
 #public/html
+*.iml
