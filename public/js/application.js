@@ -256,12 +256,13 @@ trcraftingbuddy.directive('viewport', [function()                               
                 var pairs = params.store.split(',');
                 for (var i in pairs)                                            {
                     var pair = pairs[i].split(':');
+                    
                     switch(pair[0])                                             {
-                        case 'skill':       $scope.stored.push({type: pair[0], item: $scope.getSkill(pair[1])}); break;
-                        case 'recipe':      $scope.stored.push({type: pair[0], item: $scope.getRecipe(pair[1])}); break;
-                        case 'component':   $scope.stored.push({type: pair[0], item: $scope.getComponent(pair[1])}); break;
-                        case 'filter':      $scope.stored.push({type: pair[0], item: $scope.getFilter(pair[1])}); break;
-                        case 'item':        $scope.stored.push({type: pair[0], item: $scope.getItem(pair[1])}); break;
+                        case 'skill':       $scope.store('skill', $scope.getSkill(pair[1])); break;
+                        case 'recipe':      $scope.store('recipe', $scope.getRecipe(pair[1])); break;
+                        case 'component':   $scope.store('component', $scope.getComponent(pair[1])); break;
+                        case 'filter':      $scope.store('filter', $scope.getFilter(pair[1])); break;
+                        case 'item':        $scope.store('item', $scope.getItem(pair[1])); break;
                         default: break;
                     }
                 }
