@@ -22,7 +22,7 @@ html, body {
     .viewport .panel .block {
       display: inline-flex;
       flex-direction: column;
-      width: 200px;
+      width: 220px;
       border: solid #000 1px;
       margin: 1px; }
       .viewport .panel .block .list {
