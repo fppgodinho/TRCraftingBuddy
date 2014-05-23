@@ -1,0 +1,38 @@
+<div class="filters">
+    <div class="header">
+        <div class="field">Filters: {{items.length}}</div>
+        <button data-ng-disabled="!filter" data-ng-click="filter.store()">store</button>
+        <select data-ng-model="filter" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
+        <input data-ng-model="search" placeholder="filter" />
+    </div>
+    <div style="height:75px">
+        <div class="field">ID: {{filter.id}}</div>
+        <div class="field">Description: {{filter.description}}</div>
+    </div>
+    <div class="panel">
+        <div class="block">
+            <div class="field">Recipes: {{filter.recipes.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in filter.recipes | orderBy:'name'">
+                        <button data-ng-click="item.view()">view</button>
+                        <button data-ng-click="item.store()">store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block">
+            <div class="field">Items: {{filter.items.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in filter.items | orderBy:'name'">
+                        <button data-ng-click="item.view()">view</button>
+                        <button data-ng-click="item.store()" data-ng-disabled="!item" >store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,62 @@
+<div class="items">
+    <div class="header">
+        <div class="field">Items: {{items.length}}</div>
+        <button data-ng-disabled="!item" data-ng-click="item.store()">store</button>
+        <select data-ng-model="item" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
+        <input data-ng-model="search" placeholder="filter" />
+    </div>
+    <div style="height:75px">
+        <div class="field">ID: {{item.id}}</div>
+        <div class="field">Description: {{item.description}}</div>
+    </div>
+    <div class="panel">
+        <div class="block">
+            <div class="field">Result Of: {{item.resultOf.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in item.resultOf | orderBy:'name'">
+                        <button data-ng-click="item.view()">view</button>
+                        <button data-ng-click="item.store()" data-ng-disabled="!item" >store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block">
+            <div class="field">Used In: {{item.usedIn.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in item.usedIn | orderBy:'name'">
+                        <button data-ng-click="item.view()">view</button>
+                        <button data-ng-click="item.store()" data-ng-disabled="!item" >store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block">
+            <div class="field">Components: {{item.components.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in item.components | orderBy:'name'">
+                        <button data-ng-click="item.view()">view</button>
+                        <button data-ng-click="item.store()" data-ng-disabled="!item" >store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block">
+            <div class="field">Species: {{item.species.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in item.species | orderBy:'name'">
+                        <button data-ng-click="item.view()">view</button>
+                        <button data-ng-click="item.store()" data-ng-disabled="!item" >store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

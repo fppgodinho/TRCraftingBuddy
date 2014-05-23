@@ -24,7 +24,7 @@ html, body {
     vertical-align: text-bottom; }
   .viewport .header select {
     width: 300px; }
-  .viewport .header input {
+  .viewport .header input[type='text'] {
     width: 300px; }
   .viewport .panel {
     display: inline-flex;

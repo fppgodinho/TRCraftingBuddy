@@ -1,0 +1,15 @@
+<div class="store">
+    <div class="header">
+        <div>Stored:</div>
+    </div>
+    <div class="list">
+        <div>
+            <div data-ng-repeat="item in items" class="field">
+                <button data-ng-click="item.view()">view</button>
+                <button data-ng-click="item.remove()">Remove</button>
+                <div class="column" style="width: 80px">{{item.type}}</div>
+                {{item.element.name}}
+            </div>
+        </div>
+    </div>
+</div>

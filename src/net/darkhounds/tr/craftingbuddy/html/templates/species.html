@@ -1,0 +1,26 @@
+<div class="species">
+    <div class="header">
+        <div class="field">Species: {{items.length}}</div>
+        <button data-ng-disabled="!specie" data-ng-click="specie.store()">store</button>
+        <select data-ng-model="specie" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
+        <input data-ng-model="search" placeholder="filter" />
+    </div>
+    <div style="height:75px">
+        <div class="field">ID: {{specie.id}}</div>
+        <div class="field">Description: {{specie.description}}</div>
+    </div>
+    <div class="panel">
+        <div class="block">
+            <div class="field">Items: {{specie.items.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in specie.items | orderBy:'name'">
+                        <button data-ng-click="item.item.view()">view</button>
+                        <button data-ng-click="item.item.store()" data-ng-disabled="!item" >store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

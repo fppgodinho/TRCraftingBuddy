@@ -1,0 +1,50 @@
+<div class="components">
+    <div class="header">
+        <div class="field">Components: {{items.length}}</div>
+        <button data-ng-disabled="!component" data-ng-click="component.store()">store</button>
+        <select data-ng-model="component" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
+        <input data-ng-model="search" placeholder="filter" />
+    </div>
+    <div style="height:75px">
+        <div class="field">ID: {{component.id}}</div>
+        <div class="field">Description: {{component.description}}</div>
+    </div>
+    <div class="panel">
+        <div class="block">
+            <div class="field">Items: {{component.items.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in component.items | orderBy:'name'">
+                        <button data-ng-click="item.view()">view</button>
+                        <button data-ng-click="item.store()" data-ng-disabled="!item" >store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block">
+            <div class="field">Ingredient Of: {{component.ingredientOf.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in component.ingredientOf | orderBy:'name'">
+                        <button data-ng-click="item.view()">view</button>
+                        <button data-ng-click="item.store()" data-ng-disabled="!item" >store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block">
+            <div class="field">Agent Of: {{component.agentsOf.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="list" data-ng-repeat="item in component.agentOf | orderBy:'name'">
+                        <button data-ng-click="item.view()">view</button>
+                        <button data-ng-click="item.store()" data-ng-disabled="!item" >store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

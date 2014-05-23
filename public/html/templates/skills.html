@@ -1,0 +1,28 @@
+<div class="skills">
+    <div class="header">
+        <div class="field">Skills: {{items.length}}</div>
+        <button data-ng-disabled="!skill" data-ng-click="skill.store()">store</button>
+        <select data-ng-model="skill" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
+        <input data-ng-model="search" placeholder="filter" />
+        <input id="CRAFTING_ONLY" data-ng-model="craftingOnly" type="checkbox"/>
+        <label for="CRAFTING_ONLY">Crafting Only</label>
+    </div>
+    <div style="height:75px">
+        <div class="field">ID: {{skill.id}}</div>
+        <div class="field">Description: {{skill.description}}</div>
+    </div>
+    <div class="panel">
+        <div class="block">
+            <div class="field">Recipes: {{skill.recipes.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in skill.recipes | orderBy:'name'">
+                        <button data-ng-click="item.view()">view</button>
+                        <button data-ng-click="item.store()">store</button>
+                        {{item.name}}
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
