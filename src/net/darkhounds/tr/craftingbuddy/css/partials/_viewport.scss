@@ -24,30 +24,43 @@
   .panel                                                                        {
     display:        inline-flex;
     flex-direction: row;
+    flex-wrap:      wrap;
     height:       170px;
     
     .block                                                                      {
       display:        inline-flex;
       flex-direction: column;
-      width:          280px;
+      width:          200px;
       border:         solid #000 1px;
       margin:         1px;
       
       .list                                                                     {
         height:       150px;
         overflow-y:   auto;
+        
+        .line {
+          display: block;
+          margin: 2px;
+          .filter{
+            width: 110px;
+          }
+        }
+        
+        
       }
     }
     
   }
 
-  button                                                                        {
-    margin:     2px;
+  button.view, button.store, button.view                                        {
+    border-width: 1px;
+    margin:       0px;
+    padding:      0px;
   }
   
   button:disabled                                                               {
-    border:     none;
-    background: none;
+    border:           none;
+    background:       none;
   }
   
 }

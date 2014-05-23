@@ -1,11 +1,7 @@
 trcraftingbuddy.directive('recipes', [function()                                {
     return {
         scope:      {
-            skill:      '=',
-            recipe:     '=',
-            component:  '=',
-            filter:     '=',
-            item:       '='
+            model:  '='
         },
         replace:        true,
         templateUrl:    'html/templates/recipes.html',
@@ -28,7 +24,7 @@ trcraftingbuddy.directive('recipes', [function()                                
                 //
                 if ($scope.items && $scope.items.length) for (var i in $scope.items)
                     if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.recipe = $scope.items[i];
+                        $scope.model = $scope.items[i];
             })
         }]
     };

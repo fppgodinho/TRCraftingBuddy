@@ -1,8 +1,6 @@
 trcraftingbuddy.directive('storeList', [function()                                  {
     return {
         scope:      {
-            skill:  '=',
-            recipe: '='
         },
         replace:        true,
         templateUrl:    'html/templates/storeList.html',

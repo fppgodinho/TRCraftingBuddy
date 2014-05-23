@@ -29,9 +29,7 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
 trcraftingbuddy.directive('components', [function()                                {
     return {
         scope:      {
-            recipe:     '=',
-            component:  '=',
-            item:       '='
+            model:  '='
         },
         replace:        true,
         templateUrl:    'html/templates/components.html',
@@ -54,7 +52,7 @@ trcraftingbuddy.directive('components', [function()                             
                 //
                 if ($scope.items && $scope.items.length) for (var i in $scope.items)
                     if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.component = $scope.items[i];
+                        $scope.model = $scope.items[i];
             })
         }]
     };
@@ -63,9 +61,7 @@ trcraftingbuddy.directive('components', [function()                             
 trcraftingbuddy.directive('filters', [function()                                {
     return {
         scope:      {
-            recipe:     '=',
-            filter:     '=',
-            item:       '='
+            model:  '='
         },
         replace:        true,
         templateUrl:    'html/templates/filters.html',
@@ -88,7 +84,7 @@ trcraftingbuddy.directive('filters', [function()                                
                 //
                 if ($scope.items && $scope.items.length) for (var i in $scope.items)
                     if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.filter = $scope.items[i];
+                        $scope.model = $scope.items[i];
             })
         }]
     };
@@ -97,26 +93,35 @@ trcraftingbuddy.directive('filters', [function()                                
 trcraftingbuddy.directive('items', [function()                                {
     return {
         scope:      {
-            recipe:     '=',
-            component:  '=',
-            filter:     '=',
-            item:       '=',
-            specie:     '='
+            model:  '='
         },
         replace:        true,
         templateUrl:    'html/templates/items.html',
         controller:     ['$scope', 'data', function($scope, data)               {
             $scope.items        = [];
+            $scope.crafted      = true;
+            $scope.harvested    = true;
+            $scope.other        = true;
             //
             $scope.$watch(function(){ return data.loaded; }, function(nv)       {
                 if (nv) updateList()
             })
+            $scope.$watch('crafted', function(nv) { updateList();               })
+            $scope.$watch('harvested', function(nv) { updateList();             })
+            $scope.$watch('other', function(nv) { updateList();                 })
             //
             function updateList()                                               {
                 $scope.items.length = 0;
-                for (var id in data.items)
-                    $scope.items.push(data.items[id]);
-                //
+                for (var id in data.items) {
+                    var valid = false;
+                    if ($scope.other && (!data.items[id].species || !data.items[id].species.length) && (!data.items[id].resultOf || !data.items[id].resultOf.length))
+                        valid = true;
+                    if ($scope.crafted && data.items[id].resultOf && data.items[id].resultOf.length)
+                        valid = true;
+                    if ($scope.harvested && data.items[id].species && data.items[id].species.length)
+                        valid = true;
+                    if(valid) $scope.items.push(data.items[id]);
+                }
             }
 
             $scope.$watch('search', function(nv)                                {
@@ -124,7 +129,7 @@ trcraftingbuddy.directive('items', [function()                                {
                 //
                 if ($scope.items && $scope.items.length) for (var i in $scope.items)
                     if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.item = $scope.items[i];
+                        $scope.model = $scope.items[i];
             })
         }]
     };
@@ -133,11 +138,7 @@ trcraftingbuddy.directive('items', [function()                                {
 trcraftingbuddy.directive('recipes', [function()                                {
     return {
         scope:      {
-            skill:      '=',
-            recipe:     '=',
-            component:  '=',
-            filter:     '=',
-            item:       '='
+            model:  '='
         },
         replace:        true,
         templateUrl:    'html/templates/recipes.html',
@@ -160,7 +161,7 @@ trcraftingbuddy.directive('recipes', [function()                                
                 //
                 if ($scope.items && $scope.items.length) for (var i in $scope.items)
                     if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.recipe = $scope.items[i];
+                        $scope.model = $scope.items[i];
             })
         }]
     };
@@ -169,8 +170,7 @@ trcraftingbuddy.directive('recipes', [function()                                
 trcraftingbuddy.directive('skills', [function()                                 {
     return {
         scope:      {
-            skill:  '=',
-            recipe: '='
+            model:  '='
         },
         replace:        true,
         templateUrl:    'html/templates/skills.html',
@@ -197,7 +197,7 @@ trcraftingbuddy.directive('skills', [function()                                 
                 //
                 if ($scope.items && $scope.items.length) for (var i in $scope.items)
                     if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.skill = $scope.items[i];
+                        $scope.model = $scope.items[i];
             })
         }]
     };
@@ -206,31 +206,33 @@ trcraftingbuddy.directive('skills', [function()                                 
 trcraftingbuddy.directive('species', [function()                                {
     return {
         scope:      {
-            item:       '=',
-            specie:     '='
+            model:  '='
         },
         replace:        true,
         templateUrl:    'html/templates/species.html',
         controller:     ['$scope', 'data', function($scope, data)               {
-            $scope.items        = [];
+            $scope.items            = [];
+            $scope.harvestableOnly  = true;
             //
             $scope.$watch(function(){ return data.loaded; }, function(nv)       {
                 if (nv) updateList()
             })
+            $scope.$watch('harvestableOnly', function(nv) { updateList();       })
             //
             function updateList()                                               {
                 $scope.items.length = 0;
                 for (var id in data.species)
-                    $scope.items.push(data.species[id]);
+                    if (!$scope.harvestableOnly || (data.species[id].items && data.species[id].items.length))
+                        $scope.items.push(data.species[id]);
                 //
             }
-
+            //
             $scope.$watch('search', function(nv)                                {
                 if (!data.loaded || !nv) return;
                 //
                 if ($scope.items && $scope.items.length) for (var i in $scope.items)
                     if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.specie = $scope.items[i];
+                        $scope.model = $scope.items[i];
             })
         }]
     };
@@ -239,8 +241,6 @@ trcraftingbuddy.directive('species', [function()                                
 trcraftingbuddy.directive('storeList', [function()                                  {
     return {
         scope:      {
-            skill:  '=',
-            recipe: '='
         },
         replace:        true,
         templateUrl:    'html/templates/storeList.html',
@@ -263,6 +263,7 @@ trcraftingbuddy.directive('viewport', [function()                               
         controller:     ['$scope', '$location', 'data', 'analytics', 'store', function($scope, $location, data, analytics, store) {
             $scope.ready        = false;
             $scope.type         = $location.search().type || 'skill';
+            
             
             $scope.skill        = false;
             $scope.recipe       = false;
@@ -380,7 +381,7 @@ trcraftingbuddy.directive('viewport', [function()                               
             function checkSelected(fromHash)                                    {
                 var params = $location.search();
                 if (fromHash)                                                   {
-                    $scope.type = params.type;
+                    $scope.type = params.type || 'skill';
                     switch (params.type)                                        {
                         case 'recipe':      $scope.recipe       = data.getRecipe(params.id || 1);     break;
                         case 'component':   $scope.component    = data.getComponent(params.id || 1);  break;
@@ -432,7 +433,7 @@ trcraftingbuddy.directive('viewport', [function()                               
                             case 'specie':      var item = data.getSpecie(id); break;
                             default: break;
                         }
-
+                        //
                         store.add(type, item).view = wrapViewFunction(type, item);
 
                     }
@@ -444,131 +445,6 @@ trcraftingbuddy.directive('viewport', [function()                               
                     $location.search(params);
                 }
             }
-            
-            /*
-            $scope.$watch(function(){ return $location.search(); }, function(nv) {
-                updateSelected = true;
-            });
-            $scope.$watch('type', function(nv) { updateLocation = true;         });
-            $scope.$watch('skill', function(nv) { updateLocation = true;        });
-            $scope.$watch('recipe', function(nv) { updateLocation = true;       });
-            $scope.$watch('component', function(nv) { updateLocation = true;    });
-            $scope.$watch('filter', function(nv) { updateLocation = true;       });
-            $scope.$watch('item', function(nv) { updateLocation = true;         });
-            $scope.$watch('specie', function(nv) { updateLocation = true;       });
-            function executeUpdateSelected(force)                               {
-                var params  = $location.search();
-                if (!data.loaded || !params || !params.type || (!updateSelected && !force)) return; updateSelected = false;
-                //
-                $scope.type = params.type;
-                switch (params.type)                                            {
-                    case 'recipe':      $scope.recipe       = $scope.getRecipe(params.id || 1);     break;
-                    case 'component':   $scope.component    = $scope.getComponent(params.id || 1);  break;
-                    case 'filter':      $scope.filter       = $scope.getFilter(params.id || 1);     break;
-                    case 'item':        $scope.item         = $scope.getItem(params.id || 1);       break;
-                    case 'specie':      $scope.specie       = $scope.getSpecie(params.id || 1);     break;
-                    default:            $scope.skill        = $scope.getSkill(params.id || 1);      break;
-                }
-                //
-                $scope.$apply();
-            }
-            setInterval(executeUpdateSelected, 100);
-            
-            function executeUpdateLocation(force)                               {
-                if (!$scope.ready || (!updateLocation && !force)) return; updateLocation = false;
-                var params  = $location.search();
-                params.type = $scope.type;
-                switch ($scope.type)                                            {
-                    case 'skill':       params.id = $scope.skill?$scope.skill.id:'';            break;
-                    case 'recipe':      params.id = $scope.recipe?$scope.recipe.id:'';          break;
-                    case 'component':   params.id = $scope.component?$scope.component.id:'';    break;
-                    case 'filter':      params.id = $scope.filter?$scope.filter.id:'';          break;
-                    case 'item':        params.id = $scope.item?$scope.item.id:'';              break;
-                    case 'specie':      params.id = $scope.specie?$scope.specie.id:'';          break;
-                    default: break;
-                }
-                $location.search(params);
-                $scope.$apply();
-            }
-            setInterval(executeUpdateLocation, 100);
-            
-            
-            $scope.getSkill             = function(id) { return data.getSkill(id); }
-            $scope.getSkillName         = function (id) { return data.getSkillName(id); }
-            $scope.getSkillDescription  = function (id) { return data.getSkillDescription(id); }
-            
-            $scope.getRecipe            = function(id) { return data.getRecipe(id) }
-            $scope.getRecipeName        = function (id) { return data.getRecipeName(id); }
-            $scope.getRecipeDescription = function (id) { return data.getRecipeDescription(id); }
-            
-            $scope.getComponent             = function(id) { return data.getComponent(id); }
-            $scope.getComponentName         = function(id) { return data.getComponentName(id); }
-            $scope.getComponentDescription  = function(id) { return data.getComponentDescription(id); }
-            
-            $scope.getFilter                = function(id) {}
-            $scope.getFilterName            = function(id) {}
-            $scope.getFilterDescription     = function(id) {}
-            
-            $scope.getItem                  = function(id) {}
-            $scope.getItemName              = function(id) {}
-            $scope.getItemDescription       = function(id) {}
-            
-            $scope.getSpecie                = function(id) {}
-            $scope.getSpecieName            = function(id) {}
-            $scope.getSpecieDescription     = function(id) {}
-            
-            $scope.search = function (model, list, searchValue)                 {
-                if (model && list && list.length)
-                    for (var i in list)
-                        if (list[i].name.toLowerCase().indexOf(searchValue.toLowerCase()) >= 0)
-                            $scope[model] = list[i];
-            }
-            
-            
-            var checkInitialized = false;
-            function checkStore()                                               {
-                checkInitialized = true;
-                var params = $location.search();
-                var pairs = params.store.split(',');
-                for (var i in pairs)                                            {
-                    var pair = pairs[i].split(':');
-                    
-                    switch(pair[0])                                             {
-                        case 'skill':       $scope.store('skill', $scope.getSkill(pair[1])); break;
-                        case 'recipe':      $scope.store('recipe', $scope.getRecipe(pair[1])); break;
-                        case 'component':   $scope.store('component', $scope.getComponent(pair[1])); break;
-                        case 'filter':      $scope.store('filter', $scope.getFilter(pair[1])); break;
-                        case 'item':        $scope.store('item', $scope.getItem(pair[1])); break;
-                        default: break;
-                    }
-                }
-            }
-            $scope.$watch('stored', function(nv)                                {
-                if (!checkInitialized) return;
-                var params  = $location.search();
-                params.store   = '';
-                if (nv) for (var i in nv) params.store += (params.store?',':'') + nv[i].type +':'+ nv[i].item.id
-                $location.search(params);
-            }, true)
-            
-            $scope.store = function (type, item)                                {
-                if (!type || !item) return;
-                var element = {type: type, item: item };
-                
-                element.view   = function()                                     {
-                    $scope.type         = type;
-                    $scope[$scope.type] = item;
-                }
-                
-                element.remove = function ()                                    {
-                    var index = $scope.stored.indexOf(element);
-                    if (index < 0) return;
-                    $scope.stored.splice(index, 1);
-                }
-                
-                $scope.stored.push(element);
-            }
- */
         }]
     };
 }]);

@@ -1,9 +1,7 @@
 trcraftingbuddy.directive('filters', [function()                                {
     return {
         scope:      {
-            recipe:     '=',
-            filter:     '=',
-            item:       '='
+            model:  '='
         },
         replace:        true,
         templateUrl:    'html/templates/filters.html',
@@ -26,7 +24,7 @@ trcraftingbuddy.directive('filters', [function()                                
                 //
                 if ($scope.items && $scope.items.length) for (var i in $scope.items)
                     if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.filter = $scope.items[i];
+                        $scope.model = $scope.items[i];
             })
         }]
     };

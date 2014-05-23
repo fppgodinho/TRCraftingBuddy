@@ -1,9 +1,7 @@
 trcraftingbuddy.directive('components', [function()                                {
     return {
         scope:      {
-            recipe:     '=',
-            component:  '=',
-            item:       '='
+            model:  '='
         },
         replace:        true,
         templateUrl:    'html/templates/components.html',
@@ -26,7 +24,7 @@ trcraftingbuddy.directive('components', [function()                             
                 //
                 if ($scope.items && $scope.items.length) for (var i in $scope.items)
                     if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.component = $scope.items[i];
+                        $scope.model = $scope.items[i];
             })
         }]
     };

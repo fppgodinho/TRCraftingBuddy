@@ -1,5 +1,5 @@
 <div class="viewport" data-ng-show="ready">
-    <div >
+    <div>
         <button data-ng-click="type='skill'"        data-ng-disabled="type=='skill'">Skill</button>
         <button data-ng-click="type='recipe'"       data-ng-disabled="type=='recipe'">Recipe</button>
         <button data-ng-click="type='component'"    data-ng-disabled="type=='component'">Component</button>
@@ -8,83 +8,12 @@
         <button data-ng-click="type='specie'"       data-ng-disabled="type=='specie'">Specie</button>
     </div>
 
-    <div data-ng-show="type=='skill'"       data-skills     data-skill="skill"          data-recipe="recipe"></div>
-    <div data-ng-show="type=='recipe'"      data-recipes    data-skill="skill"          data-recipe="recipe" data-component="component" data-filter="filter" data-item="item"></div>
-    <div data-ng-show="type=='component'"   data-components data-component="component"  data-recipe="recipe" data-item="item"></div>
-    <div data-ng-show="type=='filter'"      data-filters    data-filter="filter"        data-recipe="recipe" data-item="item"></div>
-    <div data-ng-show="type=='item'"        data-items      data-item="item"            data-recipe="recipe" data-component="component" data-filter="filter" data-specie="specie"></div>
-    <div data-ng-show="type=='specie'"      data-species    data-specie="specie"        data-item="item"></div>
+    <div data-skills     data-model="skill"     data-ng-show="type=='skill'"></div>
+    <div data-recipes    data-model="recipe"    data-ng-show="type=='recipe'"></div>
+    <div data-components data-model="component" data-ng-show="type=='component'"   ></div>
+    <div data-filters    data-model="filter"    data-ng-show="type=='filter'"></div>
+    <div data-items      data-model="item"      data-ng-show="type=='item'"></div>
+    <div data-species    data-model="specie"    data-ng-show="type=='specie'"></div>
     
-<!--
-    
-    <div data-ng-show="type=='recipe'">
-        <div class="header">
-            <div class="field">Recipes: {{recipes.length}}</div>
-            <button data-ng-disabled="!recipe" data-ng-click="store('recipe', recipe)">store</button>
-            <select data-ng-model="recipe" data-ng-options="item.name for item in recipes | orderBy:'name' | filter:{name:recipeSearch}"></select>
-            <input data-ng-model="recipeSearch" data-ng-change="search('recipe', recipes, recipeSearch)" placeholder="filter" />
-        </div>
-        <div style="height:75px">
-            <div class="field">ID: {{recipe.id}}</div>
-            <div class="field">Description: {{recipe.description}}</div>
-            <div class="field">Skill: {{getSkill(recipe.skill).name}}<button data-ng-click="type='skill';skill=getSkill(recipe.skill)">view</button></div>
-        </div>
-        <div class="panel">
-        </div>
-    </div>
-    
-    <div data-ng-show="type=='component'">
-        <div class="header">
-            <div class="field">Components: {{components.length}}</div>
-            <button data-ng-disabled="!component" data-ng-click="store('component', component)">store</button>
-            <select data-ng-model="component" data-ng-options="item.name for item in components | orderBy:'name' | filter:{name:componentSearch}"></select>
-            <input data-ng-model="componentSearch" data-ng-change="search('component', components, componentSearch)" placeholder="filter" />
-        </div>
-        <div style="height:75px">
-            <div class="field">ID: {{component.id}}</div>
-            <div class="field">Description: {{component.description}}</div>
-        </div>
-        <div class="panel">
-        </div>
-    </div>
-    
-    <div data-ng-show="type=='item'">
-        <div class="header">
-            <div class="field">Items: {{items.length}}</div>
-            <button data-ng-disabled="!item" data-ng-click="store('item', item)">store</button>
-            <select data-ng-model="item" data-ng-options="item.name for item in items |  orderBy:'name' | filter:{name:itemSearch}"></select>
-            <input data-ng-model="itemSearch" data-ng-change="search('item', items, itemSearch)" placeholder="filter" />
-        </div>
-        <div style="height:75px">
-            <div class="field">ID: {{item.id}}</div>
-            <div class="field">Description: {{item.description}}</div>
-        </div>
-        <div class="panel">
-        </div>
-    </div>
-    
-    <div data-ng-show="false">
-        <div>Species: {{species.length}}</div>
-        <select data-ng-model="specie" data-ng-options="item.name for item in species"></select>
-    </div>
-    
-    <div>
-        <div class="header">
-            <div>Stored:</div>
-        </div>
-        <div class="list">
-            <div>
-                <div data-ng-repeat="element in stored" class="field">
-                    <button data-ng-click="element.view()">view</button>
-                    <button data-ng-click="element.remove()">Remove</button>
-                    <div class="column" style="width: 80px">{{element.type}}</div>
-                    {{element.item.name}}
-                </div>
-            </div>
-        </div>
-    </div>
--->
     <div data-store-list></div>
-        
-    
 </div>

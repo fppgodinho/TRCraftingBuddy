@@ -1,23 +1,25 @@
 <div class="species">
     <div class="header">
         <div class="field">Species: {{items.length}}</div>
-        <button data-ng-disabled="!specie" data-ng-click="specie.store()">store</button>
-        <select data-ng-model="specie" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
+        <button data-ng-disabled="!model" data-ng-click="model.store()">+</button>
+        <select data-ng-model="model" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
         <input data-ng-model="search" placeholder="filter" />
+        <input id="HARVESTABLE_ONLY" data-ng-model="harvestableOnly" type="checkbox"/>
+        <label for="HARVESTABLE_ONLY">Harvestable Only</label>
     </div>
-    <div style="height:75px">
-        <div class="field">ID: {{specie.id}}</div>
-        <div class="field">Description: {{specie.description}}</div>
+    <div style="height:65px">
+        <div class="field">ID: {{model.id}}</div>
+        <div class="field">Name: {{model.name}}</div>
+        <div class="field">Description: {{model.description}}</div>
     </div>
     <div class="panel">
         <div class="block">
-            <div class="field">Items: {{specie.items.length}}</div>
+            <div class="field">Items: {{model.items.length}}</div>
             <div class="list">
                 <div>
-                    <div class="field" data-ng-repeat="item in specie.items | orderBy:'name'">
-                        <button data-ng-click="item.item.view()">view</button>
-                        <button data-ng-click="item.item.store()" data-ng-disabled="!item" >store</button>
-                        {{item.name}}
+                    <div class="field" data-ng-repeat="item in model.items | orderBy:'name'">
+                        <button class="store" data-ng-click="item.item.store()">+</button>
+                        <a href="javascript: void(0)" data-ng-click="item.item.view()">{{item.name}}</a>
                     </div>
                 </div>
             </div>

@@ -29,18 +29,26 @@ html, body {
   .viewport .panel {
     display: inline-flex;
     flex-direction: row;
+    flex-wrap: wrap;
     height: 170px; }
     .viewport .panel .block {
       display: inline-flex;
       flex-direction: column;
-      width: 280px;
+      width: 200px;
       border: solid #000 1px;
       margin: 1px; }
       .viewport .panel .block .list {
         height: 150px;
         overflow-y: auto; }
-  .viewport button {
-    margin: 2px; }
+        .viewport .panel .block .list .line {
+          display: block;
+          margin: 2px; }
+          .viewport .panel .block .list .line .filter {
+            width: 110px; }
+  .viewport button.view, .viewport button.store, .viewport button.view {
+    border-width: 1px;
+    margin: 0px;
+    padding: 0px; }
   .viewport button:disabled {
     border: none;
     background: none; }
