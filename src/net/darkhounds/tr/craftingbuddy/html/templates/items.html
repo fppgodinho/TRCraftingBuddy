@@ -61,5 +61,16 @@
                 </div>
             </div>
         </div>
+        <div class="block">
+            <div class="field">Filters: {{model.filters.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in model.filters | orderBy:'name'">
+                        <button class="store" data-ng-click="item.store()">+</button>
+                        <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
 </div>
