@@ -29,6 +29,17 @@
             </div>
         </div>
         <div class="block">
+            <div class="field">Species: {{model.species.length}}</div>
+            <div class="list">
+                <div>
+                    <div class="field" data-ng-repeat="item in model.species | orderBy:'name'">
+                        <button class="store" data-ng-click="item.store()">+</button>
+                        <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="block">
             <div class="field">Used In: {{model.usedIn.length}}</div>
             <div class="list">
                 <div>
@@ -44,17 +55,6 @@
             <div class="list">
                 <div>
                     <div class="field" data-ng-repeat="item in model.components | orderBy:'name'">
-                        <button class="store" data-ng-click="item.store()">+</button>
-                        <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="block">
-            <div class="field">Species: {{model.species.length}}</div>
-            <div class="list">
-                <div>
-                    <div class="field" data-ng-repeat="item in model.species | orderBy:'name'">
                         <button class="store" data-ng-click="item.store()">+</button>
                         <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
                     </div>
