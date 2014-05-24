@@ -1,4 +1,4 @@
-trcraftingbuddy.directive('items', [function()                                {
+trcraftingbuddy.directive('items', [function()                                  {
     return {
         scope:      {
             model:  '='
@@ -9,7 +9,7 @@ trcraftingbuddy.directive('items', [function()                                {
             $scope.items        = [];
             $scope.crafted      = true;
             $scope.harvested    = true;
-            $scope.other        = true;
+            $scope.other        = false;
             //
             $scope.$watch(function(){ return data.loaded; }, function(nv)       {
                 if (nv) updateList()

@@ -13,32 +13,21 @@
     </div>
     <div style="height:65px">
         <div class="field">ID: {{model.id}}</div>
-        <div class="field">Name: {{model.name}}</div>
+        <div class="field">Name: {{model.name}}
+            (
+            <span data-ng-repeat="item in model.resultOf | orderBy:'name'">
+                <button class="store" data-ng-click="item.store()">+</button>
+                <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
+            </span>
+            <span class="field" data-ng-repeat="item in model.species | orderBy:'name'">
+                <button class="store" data-ng-click="item.store()">+</button>
+                <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
+            </span>
+            )
+        </div>
         <div class="field">Description: {{model.description}}</div>
     </div>
     <div class="panel">
-        <div class="block">
-            <div class="field">Result Of: {{model.resultOf.length}}</div>
-            <div class="list">
-                <div>
-                    <div class="field" data-ng-repeat="item in model.resultOf | orderBy:'name'">
-                        <button class="store" data-ng-click="item.store()">+</button>
-                        <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="block">
-            <div class="field">Species: {{model.species.length}}</div>
-            <div class="list">
-                <div>
-                    <div class="field" data-ng-repeat="item in model.species | orderBy:'name'">
-                        <button class="store" data-ng-click="item.store()">+</button>
-                        <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
-                    </div>
-                </div>
-            </div>
-        </div>
         <div class="block">
             <div class="field">Used In: {{model.usedIn.length}}</div>
             <div class="list">

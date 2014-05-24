@@ -90,7 +90,7 @@ trcraftingbuddy.directive('filters', [function()                                
     };
 }]);
 
-trcraftingbuddy.directive('items', [function()                                {
+trcraftingbuddy.directive('items', [function()                                  {
     return {
         scope:      {
             model:  '='
@@ -101,7 +101,7 @@ trcraftingbuddy.directive('items', [function()                                {
             $scope.items        = [];
             $scope.crafted      = true;
             $scope.harvested    = true;
-            $scope.other        = true;
+            $scope.other        = false;
             //
             $scope.$watch(function(){ return data.loaded; }, function(nv)       {
                 if (nv) updateList()
@@ -164,6 +164,19 @@ trcraftingbuddy.directive('recipes', [function()                                
                         $scope.model = $scope.items[i];
             })
         }]
+    };
+}]);
+
+trcraftingbuddy.directive('select', [function()                                 {
+    return {
+        restrict:   "E",
+        require:    "?ngModel",
+        scope:      false,
+        link:       function (scope, element, attrs, ngModel)                   {
+            if (!ngModel) return;
+            //
+            element.bind("keyup", function() { element.triggerHandler("change"); })
+        }
     };
 }]);
 
