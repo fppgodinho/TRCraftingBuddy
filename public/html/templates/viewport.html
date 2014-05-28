@@ -6,14 +6,17 @@
         <button data-ng-click="type='component'"    data-ng-disabled="type=='component'">Component</button>
         <button data-ng-click="type='filter'"       data-ng-disabled="type=='filter'">Filter</button>
         <button data-ng-click="type='specie'"       data-ng-disabled="type=='specie'">Specie</button>
+        <button data-ng-click="type='blueprint'"    data-ng-disabled="type=='blueprint'" data-ng-show="blueprint">Blueprint</button>
     </div>
-
-    <div data-skills     data-model="skill"     data-ng-show="type=='skill'"></div>
-    <div data-recipes    data-model="recipe"    data-ng-show="type=='recipe'"></div>
-    <div data-items      data-model="item"      data-ng-show="type=='item'"></div>
-    <div data-components data-model="component" data-ng-show="type=='component'"   ></div>
-    <div data-filters    data-model="filter"    data-ng-show="type=='filter'"></div>
-    <div data-species    data-model="specie"    data-ng-show="type=='specie'"></div>
+    
+    <div data-skills        data-model="skill"      data-ng-show="type=='skill'"></div>
+    <div data-recipes       data-model="recipe"     data-ng-show="type=='recipe'"></div>
+    <div data-items         data-model="item"       data-ng-show="type=='item'"></div>
+    <div data-components    data-model="component"  data-ng-show="type=='component'"></div>
+    <div data-filters       data-model="filter"     data-ng-show="type=='filter'"></div>
+    <div data-species       data-model="specie"     data-ng-show="type=='specie'"></div>
     
     <div data-store-list></div>
+    
+    <div data-blueprint     data-model="blueprint"  data-ng-show="type=='blueprint'"></div>
 </div>

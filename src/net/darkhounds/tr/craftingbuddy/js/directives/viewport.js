@@ -66,8 +66,9 @@ trcraftingbuddy.directive('viewport', [function()                               
             }
             
             function wrapFunctions(type, item)                                  {
-                item.view   = wrapViewFunction(type, item);
-                item.store  = function ()                                       {
+                item.view       = wrapViewFunction(type, item);
+                item.blueprint  = wrapBlueprintFunction(item);
+                item.store      = function ()                                   {
                     var element     = store.add(type, item);
                     element.view    = item.view;
                 }
@@ -77,6 +78,13 @@ trcraftingbuddy.directive('viewport', [function()                               
                 return function()                                               {
                     $scope.type     = type;
                     $scope[type]    = item;
+                }
+            }
+            
+            function wrapBlueprintFunction(item)                                {
+                return function()                                               {
+                    $scope.type         = 'blueprint';
+                    $scope.blueprint    = item;
                 }
             }
             
@@ -109,12 +117,17 @@ trcraftingbuddy.directive('viewport', [function()                               
                 if (!data.loaded) return;
                 checkSelected();
             });
-            
+
             $scope.$watch('specie', function()                                  {
                 if (!data.loaded) return;
                 checkSelected();
             });
-            
+
+            $scope.$watch('blueprint', function()                               {
+                if (!data.loaded) return;
+                checkSelected();
+            });
+
             $scope.$watch(function(){ return $location.search(); }, function(nv){
                 if (!data.loaded || !nv) return;
                 checkSelected(true);
@@ -125,12 +138,13 @@ trcraftingbuddy.directive('viewport', [function()                               
                 if (fromHash)                                                   {
                     $scope.type = params.type || 'skill';
                     switch (params.type)                                        {
-                        case 'recipe':      $scope.recipe       = data.getRecipe(params.id || 1);     break;
-                        case 'component':   $scope.component    = data.getComponent(params.id || 1);  break;
-                        case 'filter':      $scope.filter       = data.getFilter(params.id || 1);     break;
-                        case 'item':        $scope.item         = data.getItem(params.id || 1);       break;
-                        case 'specie':      $scope.specie       = data.getSpecie(params.id || 1);     break;
-                        default:            $scope.skill        = data.getSkill(params.id || 1);      break;
+                        case 'recipe':      $scope.recipe       = data.getRecipe(params.id || 1);       break;
+                        case 'component':   $scope.component    = data.getComponent(params.id || 1);    break;
+                        case 'filter':      $scope.filter       = data.getFilter(params.id || 1);       break;
+                        case 'item':        $scope.item         = data.getItem(params.id || 1);         break;
+                        case 'specie':      $scope.specie       = data.getSpecie(params.id || 1);       break;
+                        case 'blueprint':   $scope.blueprint    = data.getItem(params.id || 1);         break;
+                        default:            $scope.skill        = data.getSkill(params.id || 1);        break;
                     }
                 } else                                                          {
                     params.type = $scope.type;
@@ -140,6 +154,7 @@ trcraftingbuddy.directive('viewport', [function()                               
                         case 'filter':      params.id = $scope.filter?$scope.filter.id:'';          break;
                         case 'item':        params.id = $scope.item?$scope.item.id:'';              break;
                         case 'specie':      params.id = $scope.specie?$scope.specie.id:'';          break;
+                        case 'blueprint':   params.id = $scope.blueprint?$scope.blueprint.id:'';    break;
                         default:            params.id = $scope.skill?$scope.skill.id:'';            break;
                     }
                     $location.search(params);

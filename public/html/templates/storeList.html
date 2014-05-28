@@ -8,6 +8,7 @@
                 <button data-ng-click="item.remove()">x</button>
                 <div class="column" style="width: 80px">{{item.type}}</div>
                 <a href="javascript: void(0)" data-ng-click="item.element.view()">{{item.element.name}}</a>
+                <button data-ng-click="item.element.blueprint()" data-ng-show="item.hasBlueprint">Blueprint</button>
             </div>
         </div>
     </div>
