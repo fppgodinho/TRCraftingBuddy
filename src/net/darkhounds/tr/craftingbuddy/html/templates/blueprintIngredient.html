@@ -1,6 +1,6 @@
 <div class="ingredient" data-ng-show="component">
     <a href="javascript: void(0)" data-ng-click="component.view()">{{component.name}}</a>:
-    <select data-ng-model="element" data-ng-options="element.item.name for element in items | orderBy:'name'"></select>
+    <select class="blue" data-ng-model="element" data-ng-options="element.item.name for element in items | orderBy:'name'"></select>
     <div data-blueprint-item data-depth="depth" data-item="element.item"></div>
     
 </div>

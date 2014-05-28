@@ -3,7 +3,7 @@
         <div class="field">ID: {{model.id}}</div>
         <div class="field">
             <a href="javascript: void(0)" data-ng-click="item.view()">{{model.name}}</a>
-            <select data-ng-model="element" data-ng-options="element.recipe.name for element in recipes | orderBy:'name'"></select>
+            <select class="red" data-ng-model="element" data-ng-options="element.recipe.name for element in recipes | orderBy:'name'"></select>
         </div>
     </div>
     

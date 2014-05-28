@@ -73,26 +73,32 @@
     }
     .ingredient                                                                 {
       select                                                                    {
-        background-color: rgba(0, 0, 255, 0.1);
       }
       >* {
         vertical-align: top;
       }
     }
     .agent                                                                      {
-      select                                                                    {
-        background-color: rgba(0, 155, 0, 0.1);
-      }
       >* {
         vertical-align: top;
       }
     }
     .item                                                                       {
       display: inline-block;
-      select                                                                    {
-        background-color: rgba(255, 0, 255, 0.1);
-      }
     }
+
+    .red{
+      background-color: rgba(255, 0, 0, 0.1);
+    }
+    .green{
+      background-color: rgba(0, 255, 0, 0.1);
+    }
+    .blue{
+      background-color: rgba(0, 0, 255, 0.1);
+    }
+    
+    
+    
   }
   
   

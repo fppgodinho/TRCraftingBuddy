@@ -54,15 +54,15 @@ html, body {
     background: none; }
   .viewport .blueprint .recipe {
     border: solid #000 1px; }
-  .viewport .blueprint .ingredient select {
-    background-color: rgba(0, 0, 255, 0.1); }
   .viewport .blueprint .ingredient > * {
     vertical-align: top; }
-  .viewport .blueprint .agent select {
-    background-color: rgba(0, 155, 0, 0.1); }
   .viewport .blueprint .agent > * {
     vertical-align: top; }
   .viewport .blueprint .item {
     display: inline-block; }
-    .viewport .blueprint .item select {
-      background-color: rgba(255, 0, 255, 0.1); }
+  .viewport .blueprint .red {
+    background-color: rgba(255, 0, 0, 0.1); }
+  .viewport .blueprint .green {
+    background-color: rgba(0, 255, 0, 0.1); }
+  .viewport .blueprint .blue {
+    background-color: rgba(0, 0, 255, 0.1); }
