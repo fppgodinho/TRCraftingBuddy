@@ -1,6 +1,5 @@
 <div class="recipe" data-ng-show="model && model.recipe && model.recipe.id">
-    <div>Skill: <a href="javascript: void(0)" data-ng-click="model.recipe.skill.view()">{{model.recipe.skill.name}}</a></div>
-    
+    <div>Skill: <a href="javascript: void(0)" data-ng-click="model.recipe.skill.view()">{{model.recipe.skill.name}}</a> Quality: {{model.result.quality}}</div>
     <div class="block blue">
         <div>Ingredients:</div>
         <div class="block ingredient" data-ng-repeat="element in model.ingredients" data-ng-init="item = element.selected.item">
