@@ -19,7 +19,7 @@ trcraftingbuddy.directive('blueprints', [function()                             
                 if (!nv) return;
                 //
                 $scope.blueprint        = blueprint.initialize(nv);
-                $scope.recipe           = $scope.blueprint.selected.recipe;
+                $scope.recipe           = $scope.blueprint.selected?$scope.blueprint.selected.recipe:null;
             });
             
             $scope.$watch('search', function(nv)                                {

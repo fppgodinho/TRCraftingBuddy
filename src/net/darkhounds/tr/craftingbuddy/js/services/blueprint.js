@@ -37,9 +37,10 @@ trcraftingbuddy.service('blueprint', ['data', function(data)                    
         //
         var element = { recipe: recipe, result: result, ingredients: [], agents: []};
         //
-        if (element.result)                                                             {
-            for (var i in recipe.ingredients)                                       {
-                var ingredient  = createComponent(element.recipe.ingredients[i], element.result['filter'+(i+1)])
+        if (element.result)                                                     {
+            for (var i in recipe.ingredients)                                   {
+                var filter      = element.result['filter'+(+i+1)];
+                var ingredient  = createComponent(element.recipe.ingredients[i], filter)
                 if (ingredient) element.ingredients.push(ingredient);
             }
             for (var i in recipe.agents)                                        {
@@ -54,8 +55,9 @@ trcraftingbuddy.service('blueprint', ['data', function(data)                    
     function createComponent(component, filter)                                 {
         if (!component) return null;
         //
-        var element         = {component: component, items:[]};
-        var items           = filter?filter.items:component.items;
+        var element         = {component: component, filter: (filter && filter.id)?filter:null, items:[]};
+        var items           = (filter && filter.id)?filter.items:component.items;
+        
         for (var i in items) element.items.push(items[i]);
         if (element.items.length)                                               {
             element.items.unshift({name: '-'});
