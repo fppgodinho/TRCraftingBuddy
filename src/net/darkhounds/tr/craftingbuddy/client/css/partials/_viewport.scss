@@ -1,0 +1,97 @@
+.viewport                                                                       {
+  padding: 5px;
+  
+  .field                                                                        {
+    @include ellipsis(no-wrap);
+    margin: 2px;
+  }
+  
+  .column                                                                       {
+    @include ellipsis(no-wrap);
+    display:        inline-block;
+    vertical-align: text-bottom;
+  }
+  
+  .header                                                                       {
+    select{
+      width: 300px;
+    }
+    input[type='text']                                                          {
+      width: 300px;
+    }
+  }
+  
+  .panel                                                                        {
+    display:        inline-flex;
+    flex-direction: row;
+    flex-wrap:      wrap;
+    height:       170px;
+    
+    .block                                                                      {
+      display:        inline-flex;
+      flex-direction: column;
+      width:          200px;
+      border:         solid #000 1px;
+      margin:         1px;
+      
+      .list                                                                     {
+        height:       150px;
+        overflow-y:   auto;
+        
+        .line {
+          display: block;
+          margin: 2px;
+          .filter{
+            width: 110px;
+          }
+        }
+        
+        
+      }
+    }
+    
+  }
+
+  button.view, button.store, button.view                                        {
+    border-width: 1px;
+    margin:       0px;
+    padding:      0px;
+  }
+  
+  button:disabled                                                               {
+    border:           none;
+    background:       none;
+  }
+  
+  
+  .blueprint                                                                    {
+    .header                                                                     {
+      
+    }
+    .recipe                                                                     {
+      border: solid #000 1px;
+    }
+    .block                                                                      {
+        vertical-align: top;
+    }
+    
+    .item                                                                       {
+      display: inline-block;
+    }
+
+    .red{
+      background-color: rgba(255, 0, 0, 0.1);
+    }
+    .green{
+      background-color: rgba(0, 255, 0, 0.1);
+    }
+    .blue{
+      background-color: rgba(0, 0, 255, 0.1);
+    }
+    
+    
+    
+  }
+  
+  
+}

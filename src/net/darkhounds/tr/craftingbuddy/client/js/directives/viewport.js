@@ -6,6 +6,7 @@ trcraftingbuddy.directive('viewport', [function()                               
             $scope.ready        = false;
             $scope.type         = $location.search().type || 'skill';
             
+            // analytics.initialize('UA-51275210-2', 'darkhounds.net');
             
             $scope.skill        = false;
             $scope.recipe       = false;

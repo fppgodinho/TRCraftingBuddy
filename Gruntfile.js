@@ -9,54 +9,96 @@ module.exports = function(grunt)                                                
     
     grunt.initConfig({
         concat: {
-            js: {
-                src: 'src/net/darkhounds/tr/craftingbuddy/js/**/*.js', dest: 'public/js/application.js'
+            client: {
+                src: 'src/net/darkhounds/tr/craftingbuddy/client/js/**/*.js',   dest: 'public/js/application.js'
+            },
+            admin: {
+                src: 'src/net/darkhounds/tr/craftingbuddy/admin/js/**/*.js',    dest: 'public/admin/js/application.js'
+            },
+            server: {
+                src: 'src/net/darkhounds/tr/craftingbuddy/client/js/**/*.js',   dest: 'server/application.js'
             }
         },
         copy: {
-            html: {
+            client: {
                 files: [
-                    {src: 'src/net/darkhounds/tr/craftingbuddy/html/index.html', dest: 'public/index.html'},
-                    {cwd: 'src/net/darkhounds/tr/craftingbuddy/html/templates', src: '**', dest: 'public/html/templates', expand: true},
-                    {cwd: 'src/net/darkhounds/tr/craftingbuddy/html/views', src: '**', dest: 'public/html/views', expand: true}
+                    {src: 'src/net/darkhounds/tr/craftingbuddy/client/html/index.html', dest: 'public/index.html'},
+                    {cwd: 'src/net/darkhounds/tr/craftingbuddy/client/html/templates',  dest: 'public/html/templates',  src: '**', expand: true},
+                    {cwd: 'src/net/darkhounds/tr/craftingbuddy/client/html/views',      dest: 'public/html/views',      src: '**', expand: true}
+                ]
+            },
+            admin: {
+                files: [
+                    {src: 'src/net/darkhounds/tr/craftingbuddy/admin/html/index.html', dest: 'public/admin/index.html'},
+                    {cwd: 'src/net/darkhounds/tr/craftingbuddy/admin/html/templates',  dest: 'public/admin/html/templates', src: '**', expand: true},
+                    {cwd: 'src/net/darkhounds/tr/craftingbuddy/admin/html/views',      dest: 'public/admin/html/views',     src: '**', expand: true}
                 ]
             }
         },
         compass: {
-            css: {
+            client: {
                 options: {
-                    config:             'config/compass.rb',
+                    config:             'config/client.rb',
                     environment:        'production',
                     outputStyle:        'nested',
                     noLineComments:     true
                 }
             },
+            admin: {
+                options: {
+                    config:             'config/admin.rb',
+                    environment:        'production',
+                    outputStyle:        'nested',
+                    noLineComments:     true
+                }
+            }
         },
-        uglify: {
-            dist:   {
+        uglify:     {
+            client:     {
                 options:    {
                     beautify:   false,
                     compress:   { drop_console: true }
                 },
-                files:  {'public/js/application.js': 'public/js/application.js'},
+                files:  {'public/js/application.js': 'public/js/application.js'}
+            },
+            admin:     {
+                options:    {
+                    beautify:   false,
+                    compress:   { drop_console: true }
+                },
+                files:  {'public/js/application.js': 'public/admin/js/application.js'}
             }
         },
         htmlmin:    {
-          dist:         {
-            options:        {
-              removeComments:       true,
-              collapseWhitespace:   true
+            client:     {
+                options:    {
+                  removeComments:       true,
+                  collapseWhitespace:   true
+                },
+                files:      [{
+                    expand: true,
+                    cwd:    'public/html',
+                    src:    '**/*.html',
+                    dest:   'public/html'
+                }]
             },
-            files:          [{
-                expand: true,
-                cwd:    'public/html',
-                src:    '**/*.html',
-                dest:   'public/html',
-            }]
-          }
-        }        
+            admin:     {
+                options:    {
+                  removeComments:       true,
+                  collapseWhitespace:   true
+                },
+                files:      [{
+                    expand: true,
+                    cwd:    'public/admin/html',
+                    src:    '**/*.html',
+                    dest:   'public/admin/html'
+                }]
+            }
+        }
     });
     
-    grunt.registerTask('default', ['concat:js', 'copy:html', 'compass:css']);
-    grunt.registerTask('compress', ['uglify:dist', 'htmlmin:dist']);
+    grunt.registerTask('default', ['concat:client', 'copy:client', 'compass:client']);
+    grunt.registerTask('admin', ['concat:admin', 'copy:admin', 'compass:admin']);
+    grunt.registerTask('server', ['concat:server']);
+    grunt.registerTask('compress', ['uglify:client', 'uglify:admin', 'htmlmin:dist', 'htmlmin:admin']);
 }
