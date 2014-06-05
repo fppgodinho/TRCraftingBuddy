@@ -54,9 +54,7 @@ html, body {
     background: none; }
   .viewport .blueprint .recipe {
     border: solid #000 1px; }
-  .viewport .blueprint .ingredient > * {
-    vertical-align: top; }
-  .viewport .blueprint .agent > * {
+  .viewport .blueprint .block {
     vertical-align: top; }
   .viewport .blueprint .item {
     display: inline-block; }

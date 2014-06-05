@@ -1,0 +1,7 @@
+<div class="item" data-ng-show="model && model.item && model.item.id">
+    
+    <select class="red" data-ng-show="model.recipes.length" data-ng-model="recipe" data-ng-options="recipe.name for recipe in model.recipes | orderBy:'name'" data-ng-change="model.selectRecipe(recipe)"></select>
+    
+    <div id="RECIPE"></div>
+    
+</div>

@@ -71,18 +71,10 @@
     .recipe                                                                     {
       border: solid #000 1px;
     }
-    .ingredient                                                                 {
-      select                                                                    {
-      }
-      >* {
+    .block                                                                      {
         vertical-align: top;
-      }
     }
-    .agent                                                                      {
-      >* {
-        vertical-align: top;
-      }
-    }
+    
     .item                                                                       {
       display: inline-block;
     }
