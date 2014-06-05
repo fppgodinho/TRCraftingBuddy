@@ -3,8 +3,8 @@
     
     <div class="block blue">
         <div>Ingredients:</div>
-        <div class="ingredient" data-ng-repeat="element in model.ingredients" data-ng-init="item = element.selected.item">
-            <div class="item">
+        <div class="block ingredient" data-ng-repeat="element in model.ingredients" data-ng-init="item = element.selected.item">
+            <div class="block item">
                 <a href="javascript: void(0)" data-ng-click="element.component.view()">{{element.component.name}}</a>:
                 <button data-ng-click="item.store()" data-ng-disabled="!item || !item.id">+</button>
                 <select class="blue" data-ng-show="element.items.length" data-ng-model="item" data-ng-options="item.name for item in element.items | orderBy:'name'" data-ng-change="element.selectItem(item)"></select>
@@ -16,8 +16,8 @@
     
     <div class="block green">
         <div>Agents:</div>
-        <div class="agent" data-ng-repeat="element in model.agents" data-ng-init="item = element.selected.item">
-            <div class="item">
+        <div class="block agent" data-ng-repeat="element in model.agents" data-ng-init="item = element.selected.item">
+            <div class="block item">
                 <a href="javascript: void(0)" data-ng-click="element.component.view()">{{element.component.name}}</a>:
                 <button data-ng-click="item.store()" data-ng-disabled="!item || !item.id">+</button>
                 <select class="blue" data-ng-show="element.items.length" data-ng-model="item" data-ng-options="item.name for item in element.items | orderBy:'name'" data-ng-change="element.selectItem(item)"></select>
