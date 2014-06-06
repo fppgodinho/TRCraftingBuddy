@@ -1,6 +1,5 @@
 'use strict';
 
-
 var trcraftingbuddy = angular.module('trcraftingbuddy.darkhounds.net', []);
 
 
@@ -659,7 +658,7 @@ trcraftingbuddy.service('blueprint', ['data', function(data)                    
     return service
 }]);
 
-trcraftingbuddy.service('data', ['$http', function($http)                       {
+trcraftingbuddy.service('data', ['$http', '$window', '$rootScope', function($http, $window, $rootScope)   {
     var service = {
         loaded:     false,
         skills:     [],
@@ -670,8 +669,88 @@ trcraftingbuddy.service('data', ['$http', function($http)                       
         species:    []
     };
     
+    var checker = {
+        skills:     false,
+        recipes:    false,
+        components: false,
+        filters:    false,
+        items:      false,
+        species:    false
+    }
+    
+    if (!$window.indexedDB)         $window.indexedDB       = $window.webkitIndexedDB || $window.mozIndexedDB || $window.msIndexedDB;
+    if (!$window.IDBTransaction)    $window.IDBTransaction  = $window.webkitIDBTransaction || $window.msIDBTransaction;
+    if (!$window.IDBKeyRange)       $window.IDBKeyRange     = $window.webkitIDBKeyRange || $window.msIDBKeyRange;
+    
+    var db                  = null;
+    var request             = window.indexedDB.open("gameDB", 1);
+    request.onerror         = function(event)                                   {
+        // browser access to indexDB denied by the user
+        console.log('DB connection failed');
+    };
+    request.onupgradeneeded = function(event)                                   {
+        console.log('DB created');
+        //
+        var DBSchema = event.target.result;
+        intializeStore(DBSchema, 'skills');
+        intializeStore(DBSchema, 'recipes');
+        intializeStore(DBSchema, 'components');
+        intializeStore(DBSchema, 'filters');
+        intializeStore(DBSchema, 'items');
+        intializeStore(DBSchema, 'species');
+    };
+    request.onsuccess       = function(event)                                   {
+        console.log('DB connection created');
+        db                  = request.result;
+        db.onerror          = function(event)                                   {
+            console.log("Database error: " + event.target.errorCode);
+        };
+        loadStore(db, 'skills',     'data/skills.json');
+        loadStore(db, 'recipes',    'data/recipes.json');
+        loadStore(db, 'components', 'data/components.json');
+        loadStore(db, 'filters',    'data/filters.json');
+        loadStore(db, 'items',      'data/items.json');
+        loadStore(db, 'species',    'data/species.json');
+    };
+
+    function intializeStore(DBSchema, name, src)                                {
+        var schema                      = DBSchema.createObjectStore(name, { keyPath: "id" });
+        schema.createIndex("name", "name", { unique: false });
+        return schema.transaction;
+    }
+    
+    function loadStore(DBSchema, name, src)                                     {
+        service[name].length    = 0;
+        var store               = DBSchema.transaction([name]).objectStore(name);
+        var cursorRequest       = store.openCursor();
+        cursorRequest.onerror   = function(error)                               {
+            console.log('Error parsing stored data from ' + name, error);
+        };
+        
+        cursorRequest.onsuccess = function(e)                                   {
+            if (e.target.result)                                                {
+                service[name].push(e.target.result.value);
+                e.target.result.continue();
+            } else if (!service[name].length)                                   {
+                $http({method: 'GET', url: src}).success(function(data)         {
+                    var store   = DBSchema.transaction([name], "readwrite").objectStore(name);
+                    for (var i in data)                                         {
+                        store.add(data[i]);
+                        service[name].push(data[i]);
+                    }
+                    checker[name] = true;
+                    check();
+                });
+            } else                                                              {
+                checker[name] = true;
+                check();
+            }
+        };
+    }
+    
     function check()                                                            {
-        if (service.skills.length <= 0 || service.recipes.length <= 0 || service.components.length <= 0 || service.filters.length <= 0 || service.items.length <= 0 || service.species.length <= 0) return;
+        if (!checker.skills || !checker.recipes || !checker.components || !checker.filters || !checker.items || !checker.species) return;
+        console.log(service.skills.length, service.recipes.length, service.components.length, service.filters.length, service.items.length, service.species.length);
         inflateSkills();
         inflateRecipes();
         inflateComponents();
@@ -679,6 +758,7 @@ trcraftingbuddy.service('data', ['$http', function($http)                       
         inflateItems();
         inflateSpecies();
         service.loaded = true;
+        setTimeout(function(){ $rootScope.$apply(); }, 0);
     }
     
     function inflateSkills()                                                    {
@@ -777,39 +857,34 @@ trcraftingbuddy.service('data', ['$http', function($http)                       
         }
     }
     
-    $http({method: 'GET', url: 'data/skills.json'}).success(function(data)      {
-        service.skills      = data;
-        check();
-    });
-    
-    $http({method: 'GET', url: 'data/recipes.json'}).success(function(data)     {
-        service.recipes     = data;
-        check();
-    });
-    
-    $http({method: 'GET', url: 'data/components.json'}).success(function(data)  {
-        service.components  = data;
-        check();
-    });
-
-    $http({method: 'GET', url: 'data/filters.json'}).success(function(data)     {
-        service.filters     = data;
-    });
-
-    $http({method: 'GET', url: 'data/items.json'}).success(function(data)       {
-        service.items       = data;
-        check();
-    });
-
-    $http({method: 'GET', url: 'data/species.json'}).success(function(data)     {
-        service.species     = data;
-        check();
-    });
-    
-    
-    
-    
-    
+//    $http({method: 'GET', url: 'data/skills.json'}).success(function(data)      {
+//        service.skills      = data;
+//        check();
+//    });
+//    
+//    $http({method: 'GET', url: 'data/recipes.json'}).success(function(data)     {
+//        service.recipes     = data;
+//        check();
+//    });
+//    
+//    $http({method: 'GET', url: 'data/components.json'}).success(function(data)  {
+//        service.components  = data;
+//        check();
+//    });
+//    
+//    $http({method: 'GET', url: 'data/filters.json'}).success(function(data)     {
+//        service.filters     = data;
+//    });
+//
+//    $http({method: 'GET', url: 'data/items.json'}).success(function(data)       {
+//        service.items       = data;
+//        check();
+//    });
+//
+//    $http({method: 'GET', url: 'data/species.json'}).success(function(data)     {
+//        service.species     = data;
+//        check();
+//    });
     
     service.getSkill             = function(id)                                 {
         for (var i in service.skills) if (service.skills[i].id == id)
