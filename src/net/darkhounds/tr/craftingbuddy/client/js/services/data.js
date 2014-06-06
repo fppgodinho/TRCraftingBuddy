@@ -1,5 +1,5 @@
-trcraftingbuddy.service('data', ['$http', '$window', '$rootScope', function($http, $window, $rootScope)   {
-    var service = {
+trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable', function($rootScope, $http, $window, observable) {
+    var service = observable.create({
         loaded:     false,
         skills:     [],
         recipes:    [],
@@ -7,7 +7,7 @@ trcraftingbuddy.service('data', ['$http', '$window', '$rootScope', function($htt
         filters:    [],
         items:      [],
         species:    []
-    };
+    });
     
     var checker = {
         skills:     false,
@@ -60,47 +60,98 @@ trcraftingbuddy.service('data', ['$http', '$window', '$rootScope', function($htt
     }
     
     function loadStore(DBSchema, name, src)                                     {
-        service[name].length    = 0;
+        checker[name]           = false;
+        //
         var store               = DBSchema.transaction([name]).objectStore(name);
-        var cursorRequest       = store.openCursor();
-        cursorRequest.onerror   = function(error)                               {
-            console.log('Error parsing stored data from ' + name, error);
-        };
-        
-        cursorRequest.onsuccess = function(e)                                   {
-            if (e.target.result)                                                {
-                service[name].push(e.target.result.value);
-                e.target.result.continue();
-            } else if (!service[name].length)                                   {
-                $http({method: 'GET', url: src}).success(function(data)         {
-                    var store   = DBSchema.transaction([name], "readwrite").objectStore(name);
-                    for (var i in data)                                         {
-                        store.add(data[i]);
-                        service[name].push(data[i]);
-                    }
-                    checker[name] = true;
-                    check();
-                });
-            } else                                                              {
-                checker[name] = true;
+        if (!store.count) return $http({method: 'GET', url: src}).success(function(data) {
+            var transaction         = DBSchema.transaction([name], "readwrite");
+            transaction.onsuccess   = function(event)                           {
+                checker[name]       = true;
                 check();
-            }
-        };
+            };
+            var store               = transaction.objectStore(name);
+            for (var i in data) store.add(data[i]);
+        })
+        //
+        // getAll(DBSchema, name);
+        checker[name]   = true;
+        check();
     }
     
     function check()                                                            {
         if (!checker.skills || !checker.recipes || !checker.components || !checker.filters || !checker.items || !checker.species) return;
-        console.log(service.skills.length, service.recipes.length, service.components.length, service.filters.length, service.items.length, service.species.length);
-        inflateSkills();
-        inflateRecipes();
-        inflateComponents();
-        inflateFilters();
-        inflateItems();
-        inflateSpecies();
-        service.loaded = true;
-        setTimeout(function(){ $rootScope.$apply(); }, 0);
+        //
+        $rootScope.$apply(function()                                            {
+            service.loaded  = true;
+            service.$broadcast('loaded');
+        });
     }
     
+    function getFilteredByName(DBSchema, name, filter)                          {
+        var response            = observable.create({data: []});
+        //
+        var transaction         = DBSchema.transaction([name]);
+        var store               = transaction.objectStore(name);
+        
+        
+        
+        
+        
+        
+        console.log('Errrr: ', store.count());
+        
+        var cursor              = store.openCursor();
+        cursor.onerror   = function(error)                                      {
+            console.log('Error parsing stored data from ' + name, error);
+            $rootScope.$apply(function()                                        {
+                response.$broadcast('error', error);
+            });
+        };
+        cursor.onsuccess = function(e)                                          {
+            var result = cursor.result || null;
+            console.log('Hummmm', name, filter, result);
+            if (result)                                                         {
+                if (!filter || result.value.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
+                    response.data.push(result.value);
+                console.log('doooiiss', response.data.length);
+                result.continue();
+            } else $rootScope.$apply(function()                                 {
+                response.$broadcast('loaded', response.data);
+                console.log('-->', response.data.length);
+            });
+        };
+        //
+        return response;
+    }
+    
+    function getByKey(DBSchema, name, key)                                      {
+        var response        = observable.create({data: null});
+        //
+        var request         = DBSchema.transaction([name]).objectStore(name).get(key);
+        request.onerror     = function(error)                                   {
+            $rootScope.$apply(function()                                        {
+                response.$broadcast('error', error);
+            });
+        };
+        request.onsuccess   = function(e)                                       {
+            $rootScope.$apply(function()                                        {
+                response.data   = request.result;
+                response.$broadcast('loaded', response.data);
+            });
+        };
+        //
+        return response;
+    }
+    
+    service.getSkills   = function(filter)                                      {
+        return getFilteredByName(db, 'skills', filter);
+    }
+    
+    service.getRecipe   = function(id)                                          {
+        return getByKey(db, 'recipes', id)
+    }
+    
+    /*
     function inflateSkills()                                                    {
         for (var i in service.skills)                                           {
             var skill       = service.skills[i];
@@ -197,35 +248,6 @@ trcraftingbuddy.service('data', ['$http', '$window', '$rootScope', function($htt
         }
     }
     
-//    $http({method: 'GET', url: 'data/skills.json'}).success(function(data)      {
-//        service.skills      = data;
-//        check();
-//    });
-//    
-//    $http({method: 'GET', url: 'data/recipes.json'}).success(function(data)     {
-//        service.recipes     = data;
-//        check();
-//    });
-//    
-//    $http({method: 'GET', url: 'data/components.json'}).success(function(data)  {
-//        service.components  = data;
-//        check();
-//    });
-//    
-//    $http({method: 'GET', url: 'data/filters.json'}).success(function(data)     {
-//        service.filters     = data;
-//    });
-//
-//    $http({method: 'GET', url: 'data/items.json'}).success(function(data)       {
-//        service.items       = data;
-//        check();
-//    });
-//
-//    $http({method: 'GET', url: 'data/species.json'}).success(function(data)     {
-//        service.species     = data;
-//        check();
-//    });
-    
     service.getSkill             = function(id)                                 {
         for (var i in service.skills) if (service.skills[i].id == id)
             return service.skills[i];
@@ -315,6 +337,7 @@ trcraftingbuddy.service('data', ['$http', '$window', '$rootScope', function($htt
         var item = service.getSpecie(id)
         return item.description || '';
     }
+    //*/
     
     return service
 }]);

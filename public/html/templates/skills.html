@@ -2,7 +2,8 @@
     <div class="header">
         <div class="field">Skills: {{items.length}}</div>
         <button class="store" data-ng-disabled="!model" data-ng-click="model.store()">+</button>
-        <select data-ng-model="model" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
+        <!--<select data-ng-model="model" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>-->
+        <select data-ng-model="model" data-ng-options="item.name for item in items"></select>
         <input data-ng-model="search" placeholder="filter" />
         <input id="CRAFTING_ONLY" data-ng-model="craftingOnly" type="checkbox"/>
         <label for="CRAFTING_ONLY">Crafting Only</label>
@@ -18,8 +19,7 @@
             <div class="list">
                 <div>
                     <div class="field" data-ng-repeat="item in model.recipes | orderBy:'name'">
-                        <button class="store" data-ng-click="item.store()">+</button>
-                        <a href="javascript:void(0);" data-ng-click="item.view()">{{item.name}}</a>
+                        <div data-skill-recipe data-model="item"></div>
                     </div>
                 </div>
             </div>
