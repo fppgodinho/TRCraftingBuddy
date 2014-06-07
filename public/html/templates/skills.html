@@ -1,25 +1,24 @@
 <div class="skills">
     <div class="header">
-        <div class="field">Skills: {{items.length}}</div>
-        <button class="store" data-ng-disabled="!model" data-ng-click="model.store()">+</button>
-        <!--<select data-ng-model="model" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>-->
-        <select data-ng-model="model" data-ng-options="item.name for item in items"></select>
+        <div class="field">Skills: {{elements.length}}</div>
+        <button class="store" class="store" data-ng-disabled="!selected" data-ng-click="store()">+</button>
+        <select data-ng-model="selected" data-ng-options="element.name for element in elements"></select>
         <input data-ng-model="search" placeholder="filter" />
         <input id="CRAFTING_ONLY" data-ng-model="craftingOnly" type="checkbox"/>
         <label for="CRAFTING_ONLY">Crafting Only</label>
     </div>
     <div style="height:65px">
-        <div class="field">ID: {{model.id}}</div>
-        <div class="field">Name: {{model.name}}</div>
-        <div class="field">Description: {{model.description}}</div>
+        <div class="field">ID: {{selected.id}}</div>
+        <div class="field">Name: {{selected.name}}</div>
+        <div class="field">Description: {{selected.description}}</div>
     </div>
     <div class="panel">
         <div class="block">
-            <div class="field">Recipes: {{model.recipes.length}}</div>
+            <div class="field">Recipes: {{selected.recipes.length}}</div>
             <div class="list">
                 <div>
-                    <div class="field" data-ng-repeat="item in model.recipes | orderBy:'name'">
-                        <div data-skill-recipe data-model="item"></div>
+                    <div data-ng-repeat="id in selected.recipes">
+                        <div class="field" data-skill-recipe data-id="id"></div>
                     </div>
                 </div>
             </div>

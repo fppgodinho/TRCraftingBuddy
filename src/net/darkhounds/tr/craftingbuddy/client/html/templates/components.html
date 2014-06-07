@@ -1,45 +1,42 @@
 <div class="components">
     <div class="header">
-        <div class="field">Components: {{items.length}}</div>
-        <button data-ng-disabled="!model" data-ng-click="model.store()">+</button>
-        <select data-ng-model="model" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
+        <div class="field">Components: {{elements.length}}</div>
+        <button class="store" data-ng-disabled="!selected" data-ng-click="store()">+</button>
+        <select data-ng-model="selected" data-ng-options="element.name for element in elements"></select>
         <input data-ng-model="search" placeholder="filter" />
     </div>
     <div style="height:65px">
-        <div class="field">ID: {{model.id}}</div>
-        <div class="field">Name: {{model.name}}</div>
-        <div class="field">Description: {{model.description}}</div>
+        <div class="field">ID: {{selected.id}}</div>
+        <div class="field">Name: {{selected.name}}</div>
+        <div class="field">Description: {{selected.description}}</div>
     </div>
     <div class="panel">
         <div class="block">
-            <div class="field">Items: {{model.items.length}}</div>
+            <div class="field">Items: {{selected.items.length}}</div>
             <div class="list">
                 <div>
-                    <div class="field" data-ng-repeat="item in model.items | orderBy:'name'">
-                        <button class="store" data-ng-click="item.store()">+</button>
-                        <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
+                    <div data-ng-repeat="id in selected.items">
+                        <div class="field" data-component-item data-id="id"></div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="block">
-            <div class="field">Ingredient Of: {{model.ingredientOf.length}}</div>
+            <div class="field">Ingredient Of: {{selected.ingredientOf.length}}</div>
             <div class="list">
                 <div>
-                    <div class="field" data-ng-repeat="item in model.ingredientOf | orderBy:'name'">
-                        <button class="store" data-ng-click="item.store()">+</button>
-                        <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
+                    <div data-ng-repeat="id in selected.ingredientOf">
+                        <div class="field" data-component-ingredientof data-id="id"></div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="block">
-            <div class="field">Agent Of: {{model.agentsOf.length}}</div>
+            <div class="field">Agent Of: {{selected.agentsOf.length}}</div>
             <div class="list">
                 <div>
-                    <div class="list" data-ng-repeat="item in model.agentOf | orderBy:'name'">
-                        <button class="store" data-ng-click="item.store()">+</button>
-                        <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
+                    <div data-ng-repeat="id in selected.agentOf">
+                        <div class="field" data-component-agentof data-id="id"></div>
                     </div>
                 </div>
             </div>

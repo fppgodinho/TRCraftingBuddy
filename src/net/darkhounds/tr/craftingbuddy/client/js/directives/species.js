@@ -1,34 +1,85 @@
 trcraftingbuddy.directive('species', [function()                                {
     return {
-        scope:      {
-            model:  '='
-        },
+        scope:          {},
         replace:        true,
         templateUrl:    'html/templates/species.html',
-        controller:     ['$scope', 'data', function($scope, data)               {
-            $scope.items            = [];
-            $scope.harvestableOnly  = true;
+        controller:     ['$scope', 'data', 'store', '$location', function($scope, data, store, $location) {
+            var type                = 'specie';
+            $scope.selected         = false;
+            $scope.elements         = [];
+            $scope.harvestableOnly  = false;
+            $scope.search           = '';
+            $scope.store            = function()                                {
+                if (type && $scope.selected) store.add(type, $scope.selected);
+            };
             //
-            $scope.$watch(function(){ return data.loaded; }, function(nv)       {
-                if (nv) updateList()
-            })
-            $scope.$watch('harvestableOnly', function(nv) { updateList();       })
+            $scope.$on('$locationChangeStart', function(nv)                     {
+                var params      = $location.search();
+                for (var i in $scope.elements)
+                    if ($scope.elements[i].id == params[type])
+                        $scope.selected = $scope.elements[i];
+            });
             //
-            function updateList()                                               {
-                $scope.items.length = 0;
-                for (var id in data.species)
-                    if (!$scope.harvestableOnly || (data.species[id].items && data.species[id].items.length))
-                        $scope.items.push(data.species[id]);
-                //
-            }
+            $scope.$watch('selected', function(nv)                              {
+                var params  = $location.search();
+                if (!$scope.selected) return;
+                params[type]    = $scope.selected.id
+                $location.search(params);
+            });
+            //
+            $scope.$watch('harvestableOnly', function(nv)                       {
+                if (!data.loaded) return;
+                var params      = $location.search();
+                getData();
+            });
             //
             $scope.$watch('search', function(nv)                                {
-                if (!data.loaded || !nv) return;
-                //
-                if ($scope.items && $scope.items.length) for (var i in $scope.items)
-                    if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.model = $scope.items[i];
-            })
+                if (!data.loaded) return;
+                getData();
+            });
+            //
+            function loadData()                                                 {
+                data.$on('loaded', getData );
+            }
+            //
+            function getData()                                                  {
+                data.getSpecies($scope.search).$on('loaded', function(data)     {
+                    $scope.elements.length  = 0;
+                    var list                = data || [];
+                    var params              = $location.search();
+                    for (var i in list)                                         {
+                        if ($scope.harvestableOnly && (!list[i].items || !list[i].items.length)) continue;
+                        
+                        $scope.elements.push(list[i]);
+                        if ((($scope.search || !params[type]) && $scope.elements.length == 1) || (params.type == type && +params[type] == +list[i].id))
+                            $scope.selected = list[i];
+                    }
+                });
+            }
+            //
+            if (!data.loaded) loadData(); else getData();
         }]
     };
 }]);
+
+trcraftingbuddy.directive('specieItem', ['elementController', function(elementController) {
+    return {
+        scope:          {
+            item: '='
+        },
+        templateUrl:    'html/templates/specieItem.html',
+        replace:        true,
+        controller:     ['$scope', 'data', function($scope, data)               {
+            var controller          = elementController.create($scope);
+            controller.type         = 'item';
+            controller.loadElement  = function()                                {
+                $scope.element  = null; if (!$scope.item) return;
+                console.log($scope.item);
+                var request     = data.getItem($scope.item.id + '');
+                request.$on('loaded', function(data) { $scope.element = data;   });
+            };
+            controller.loadElement();
+        }]
+    }
+}]);
+

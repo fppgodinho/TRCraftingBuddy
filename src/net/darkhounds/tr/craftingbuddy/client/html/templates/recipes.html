@@ -1,34 +1,32 @@
 <div class="recipes">
     <div class="header">
-        <div class="field">Recipes: {{items.length}}</div>
-        <button class="store" data-ng-disabled="!model" data-ng-click="model.store()">+</button>
-        <select data-ng-model="model" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
+        <div class="field">Recipes: {{elements.length}}</div>
+        <button class="store" class="store" data-ng-disabled="!selected" data-ng-click="store()">+</button>
+        <select data-ng-model="selected" data-ng-options="element.name for element in elements"></select>
         <input data-ng-model="search" placeholder="filter" />
     </div>
     <div style="height:65px">
-        <div class="field">ID: {{model.id}}</div>
-        <div class="field">Name: {{model.name}} (<a href="javascript:void(0)" data-ng-click="model.skill.view()">{{model.skill.name}}</a>)</div>
-        <div class="field">Description: {{model.description}}</div>
+        <div class="field">ID: {{selected.id}}</div>
+        <div class="field">Name: {{selected.name}} (<a data-recipe-skill data-id="selected.skill"></a>)</div>
+        <div class="field">Description: {{selected.description}}</div>
     </div>
     <div class="panel">
         <div class="block">
-            <div class="field">Ingredients: {{model.ingredients.length}}</div>
+            <div class="field">Ingredients: {{selected.ingredients.length}}</div>
             <div class="list">
                 <div>
-                    <div class="line" data-ng-repeat="item in model.ingredients | orderBy:'name'">
-                        <button class="store" data-ng-click="item.store()">+</button>
-                        <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
+                    <div data-ng-repeat="id in selected.ingredients">
+                        <div class="field" data-recipe-ingredient data-id="id"></div>
                     </div>
                 </div>
             </div>
         </div>
         <div class="block">
-            <div class="field">Agents: {{model.agents.length}}</div>
+            <div class="field">Agents: {{selected.agents.length}}</div>
             <div class="list">
                 <div>
-                    <div class="line" data-ng-repeat="item in model.agents | orderBy:getComponentName">
-                        <button class="store" data-ng-click="item.store()">+</button>
-                        <a href="javascript: void(0)" data-ng-click="item.view()">{{item.name}}</a>
+                    <div data-ng-repeat="id in selected.agents">
+                        <div class="field" data-recipe-agent data-id="id"></div>
                     </div>
                 </div>
             </div>
@@ -37,28 +35,8 @@
             <div class="field">Results:</div>
             <div class="list">
                 <div>
-                    <div class="line" data-ng-repeat="item in model.results">
-                        <button class="store" data-ng-click="item.item.store()">+</button>
-                        <div class="column" style="width: 150px"><a href="javascript: void(0)" data-ng-click="item.item.view()">{{item.name}}</a></div>
-                        <div class="column" style="width: 15px">{{item.count}}</div>
-                        <div class="column" style="width: 15px">{{item.quality}}</div>
-                        <div class="column" style="width: 15px">{{item.difficulty}}</div>
-                        <div class="column filter">
-                            <button class="store" data-ng-click="item.filter1.store()" data-ng-show="item.filter1.id">+</button>
-                            <a href="javascript:void(0)" data-ng-click="item.filter1.view()" data-ng-show="item.filter1.id">{{item.filter1.name}}</a>
-                        </div>
-                        <div class="column filter">
-                            <button class="store" data-ng-click="item.filter2.store()" data-ng-show="item.filter2.id">+</button>
-                            <a href="javascript:void(0)" data-ng-click="item.filter2.view()" data-ng-show="item.filter2.id">{{item.filter2.name}}</a>
-                        </div>
-                        <div class="column filter">
-                            <button class="store" data-ng-click="item.filter3.store()" data-ng-show="item.filter3.id">+</button>
-                            <a href="javascript:void(0)" data-ng-click="item.filter3.view()" data-ng-show="item.filter3.id">{{item.filter3.name}}</a>
-                        </div>
-                        <div class="column filter">
-                            <button class="store" data-ng-click="item.filter4.store()" data-ng-show="item.filter4.id">+</button>
-                            <a href="javascript:void(0)" data-ng-click="item.filter4.view()" data-ng-show="item.filter4.id">{{item.filter4.name}}</a>
-                        </div>
+                    <div data-ng-repeat="result in selected.results">
+                        <div class="line" data-recipe-result data-element="result"></div>
                     </div>
                 </div>
             </div>
