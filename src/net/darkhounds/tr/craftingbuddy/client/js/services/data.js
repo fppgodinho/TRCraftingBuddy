@@ -68,18 +68,26 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         checker[name]           = false;
         //
         var store               = DBSchema.transaction([name]).objectStore(name);
-        if (!store.count) return $http({method: 'GET', url: src}).success(function(data) {
-            var transaction         = DBSchema.transaction([name], "readwrite");
-            transaction.onsuccess   = function(event)                           {
-                checker[name]       = true;
-                check();
-            };
-            var store               = transaction.objectStore(name);
-            for (var i in data) store.add(data[i]);
-        })
-        //
-        checker[name]   = true;
-        check();
+
+        store.count().onsuccess = function(e)                                   {
+            if (!e.target.result) return $http({method: 'GET', url: src}).success(function(data) {
+                var store               = DBSchema.transaction([name], "readwrite").objectStore(name);
+                var count               = 0;
+                for (var i in data)                                             {
+                    count++;
+                    store.add(data[i]).onsuccess = function(e)                  {
+                        if(--count <= 0)                                        {
+                            checker[name]       = true;
+                            check();
+                        }
+                    };
+                }
+                
+            })
+            //
+            checker[name]   = true;
+            check();
+        }
     }
     //
     function check()                                                            {

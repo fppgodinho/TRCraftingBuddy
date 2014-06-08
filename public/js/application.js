@@ -819,7 +819,6 @@ trcraftingbuddy.directive('specieItem', ['elementController', function(elementCo
             controller.type         = 'item';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.item) return;
-                console.log($scope.item);
                 var request     = data.getItem($scope.item.id + '');
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
@@ -1163,18 +1162,26 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         checker[name]           = false;
         //
         var store               = DBSchema.transaction([name]).objectStore(name);
-        if (!store.count) return $http({method: 'GET', url: src}).success(function(data) {
-            var transaction         = DBSchema.transaction([name], "readwrite");
-            transaction.onsuccess   = function(event)                           {
-                checker[name]       = true;
-                check();
-            };
-            var store               = transaction.objectStore(name);
-            for (var i in data) store.add(data[i]);
-        })
-        //
-        checker[name]   = true;
-        check();
+
+        store.count().onsuccess = function(e)                                   {
+            if (!e.target.result) return $http({method: 'GET', url: src}).success(function(data) {
+                var store               = DBSchema.transaction([name], "readwrite").objectStore(name);
+                var count               = 0;
+                for (var i in data)                                             {
+                    count++;
+                    store.add(data[i]).onsuccess = function(e)                  {
+                        if(--count <= 0)                                        {
+                            checker[name]       = true;
+                            check();
+                        }
+                    };
+                }
+                
+            })
+            //
+            checker[name]   = true;
+            check();
+        }
     }
     //
     function check()                                                            {
@@ -1237,7 +1244,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
     return service
 }]);
 
-trcraftingbuddy.service('store', ['$location', function($location)              {
+trcraftingbuddy.service('store', ['$rootScope', '$location', 'data', function($rootScope, $location, data) {
     //
     var service = { items: [] };
     service.add = function (type, element)                                      {
@@ -1248,7 +1255,14 @@ trcraftingbuddy.service('store', ['$location', function($location)              
             var index       = service.items.indexOf(item);
             if (index < 0) return;
             service.items.splice(index, 1);
-        }
+            //
+            store           = '';
+            for (var i in service.items)
+                store += (store?',':'') + service.items[i].type + ':' + service.items[i].element.id;
+            var params      = $location.search();
+            params.store    = store;
+            $location.search(params);
+        };
         item.view           = function ()                                       {
             var params          = $location.search();
             params.type         = type;
@@ -1261,11 +1275,48 @@ trcraftingbuddy.service('store', ['$location', function($location)              
             params.blueprint    = element.id;
             $location.search(params);
         };
-        item.hasBlueprint   = (type == 'item' && element.resultOf && element.resultOf.length); 
+        item.hasBlueprint       = (type == 'item' && element.resultOf && element.resultOf.length); 
         service.items.push(item);
+        store += (store?',':'') + type + ':' + element.id;
+        var params      = $location.search();
+        params.store    = store;
+        $location.search(params);
         //
         return item;
     }
+    //
+    var store = '';
+    function parseStore(newStore)                                               {
+        store                   = '';
+        service.items.length    = 0;
+        var pairs = newStore.split(',');
+        for (var i in pairs)                                                {
+            var pair    = pairs[i].split(':'); if (pair.length != 2) continue;
+            var type    = pair[0];
+            var id      = pair[1];
+            var request = null;
+            switch(pair[0])                                                 {
+                case 'skill':       request = data.getSkill(id);        break;
+                case 'recipe':      request = data.getRecipe(id);       break;
+                case 'component':   request = data.getComponent(id);    break;
+                case 'filter':      request = data.getFilter(id);       break;
+                case 'item':        request = data.getItem(id);         break;
+                case 'specie':      request = data.getSpecie(id);       break;
+                default: break;
+            }
+            if (request) request.$on('loaded', function(data){
+                service.add(type, data); 
+            }) 
+        }
+    }
+    $rootScope.$on('$locationChangeStart', function(nv)                         {
+        var params          = $location.search();
+        if (store != params.store && data.loaded) parseStore(params.store || '');
+    });
+    if (data.loaded) parseStore($location.search().store || '');
+    else data.$on('loaded', function(){
+        parseStore($location.search().store || '');
+    });
     //
     return service
 }]);

@@ -74,7 +74,6 @@ trcraftingbuddy.directive('specieItem', ['elementController', function(elementCo
             controller.type         = 'item';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.item) return;
-                console.log($scope.item);
                 var request     = data.getItem($scope.item.id + '');
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
