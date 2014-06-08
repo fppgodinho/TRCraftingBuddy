@@ -4,8 +4,7 @@ trcraftingbuddy.factory('elementController', ['data', 'store' , '$location', fun
             var controller  = base || {};
             $scope.element  = null;
             $scope.store    = function()                                            {
-                if (controller.type && $scope.element)
-                    store.add(controller.type, $scope.element);
+                if (controller.type && $scope.element) store.add(controller.type, $scope.element?$scope.element.id:0);
             };
             $scope.view     = function()                                            {
                 if (!controller.type || !$scope.element) return;

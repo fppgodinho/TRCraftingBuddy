@@ -5,35 +5,80 @@ var trcraftingbuddy = angular.module('trcraftingbuddy.darkhounds.net', ['ngRoute
 
 trcraftingbuddy.directive('blueprints', [function()                              {
     return {
-        scope:      {
-            model:  '='
-        },
+        scope:          {},
         replace:        true,
         templateUrl:    'html/templates/blueprints.html',
-        controller:     ['$scope', 'data', 'blueprint', function($scope, data, blueprint) {
+        controller:     ['$scope', 'data', 'store', '$location', function($scope, data, store, $location) {
+            $scope.selected     = false;
+            $scope.elements     = [];
             $scope.search       = '';
-            $scope.items        = [];
-            $scope.recipe       = null;
-            
-            $scope.$watch(function(){ return data.loaded; }, function(nv)       {
-                $scope.items.length = 0;
-                for (var id in data.items) $scope.items.push(data.items[id]);
+            $scope.store        = function()                                    {
+                if ($scope.selected) store.add('item', $scope.selected?$scope.selected.id:0);
+            };
+            //
+            $scope.$on('$locationChangeStart', function(nv)                     {
+                var params      = $location.search();
+                for (var i in $scope.elements)
+                    if ($scope.elements[i].id == params.blueprint)
+                        $scope.selected = $scope.elements[i];
             });
-            
-            $scope.$watch('model', function(nv)                                 {
-                if (!nv) return;
-                //
-                $scope.blueprint        = blueprint.initialize(nv);
-                $scope.recipe           = $scope.blueprint.selected?$scope.blueprint.selected.recipe:null;
+            //
+            $scope.$watch('selected', function(nv)                              {
+                var params  = $location.search();
+                if (!$scope.selected) return;
+                params.blueprint    = $scope.selected.id;
+                $location.search(params);
             });
-            
+            //
             $scope.$watch('search', function(nv)                                {
-                if (!data.loaded || !nv) return;
-                //
-                if ($scope.items && $scope.items.length) for (var i in $scope.items)
-                    if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-                        $scope.model = $scope.items[i];
+                if (!data.loaded) return;
+                getData();
             });
+            //
+            function loadData()                                                 {
+                data.$on('loaded', getData );
+            }
+            //
+            function getData()                                                  {
+                data.getItems($scope.search).$on('loaded', function(data)       {
+                    $scope.elements.length  = 0;
+                    var list                = data || [];
+                    var params              = $location.search();
+                    for (var i in list)                                         {
+                        if (!list[i].resultOf || !list[i].resultOf.length) continue;
+
+                        $scope.elements.push(list[i]);
+                        if ((($scope.search || !params.blueprint) && $scope.elements.length == 1) || (params.type == 'blueprint' && params.blueprint == list[i].id))
+                            $scope.selected = list[i];
+                    }
+                });
+            }
+            //
+            if (!data.loaded) loadData(); else getData();
+            
+//            $scope.search       = '';
+//            $scope.items        = [];
+//            $scope.recipe       = null;
+//            
+//            $scope.$watch(function(){ return data.loaded; }, function(nv)       {
+//                $scope.items.length = 0;
+//                for (var id in data.items) $scope.items.push(data.items[id]);
+//            });
+//            
+//            $scope.$watch('model', function(nv)                                 {
+//                if (!nv) return;
+//                //
+//                $scope.blueprint        = blueprint.initialize(nv);
+//                $scope.recipe           = $scope.blueprint.selected?$scope.blueprint.selected.recipe:null;
+//            });
+//            
+//            $scope.$watch('search', function(nv)                                {
+//                if (!data.loaded || !nv) return;
+//                //
+//                if ($scope.items && $scope.items.length) for (var i in $scope.items)
+//                    if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
+//                        $scope.model = $scope.items[i];
+//            });
         }]
     };
 }]);
@@ -46,15 +91,15 @@ trcraftingbuddy.directive('blueprintsItem', [function()                         
         replace:        true,
         templateUrl:    'html/templates/blueprintsItem.html',
         controller:     ['$scope', '$compile', '$element', function($scope, $compile, $element) {
-            $scope.recipes  = []; 
+            $scope.recipes  = [];
             $scope.recipe   = null;
-            
+
             $scope.$watch('model', function(nv)                                 {
                 if (!nv) return;
                 //
                 $scope.recipe = nv.selected?nv.selected.recipe:null;
             });
-            
+
             $scope.$watch('recipe', function(nv)                                {
                 var recipe  = $element.find('#RECIPE').empty(); if (!nv) return;
                 var node    = angular.element('<div data-model="model.selected" data-blueprints-recipe></div>').appendTo(recipe);
@@ -90,7 +135,7 @@ trcraftingbuddy.directive('components', [function()                             
             $scope.elements     = [];
             $scope.search       = '';
             $scope.store        = function()                                    {
-                if (type && $scope.selected) store.add(type, $scope.selected);
+                if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
             };
             //
             $scope.$on('$locationChangeStart', function(nv)                     {
@@ -205,7 +250,7 @@ trcraftingbuddy.directive('filters', [function()                                
             $scope.elements     = [];
             $scope.search       = '';
             $scope.store        = function()                                    {
-                if (type && $scope.selected) store.add(type, $scope.selected);
+                if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
             };
             //
             $scope.$on('$locationChangeStart', function(nv)                     {
@@ -301,10 +346,9 @@ trcraftingbuddy.directive('items', [function()                                  
             $scope.crafted      = false;
             $scope.harvested    = false;
             $scope.other        = false;
-            $scope.crafted      = false;
             $scope.search       = '';
             $scope.store        = function()                                    {
-                if (type && $scope.selected) store.add(type, $scope.selected);
+                if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
             };
             //
             $scope.$on('$locationChangeStart', function(nv)                     {
@@ -487,7 +531,7 @@ trcraftingbuddy.directive('recipes', [function()                                
             $scope.elements     = [];
             $scope.search       = '';
             $scope.store        = function()                                    {
-                if (type && $scope.selected) store.add(type, $scope.selected);
+                if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
             };
             //
             $scope.$on('$locationChangeStart', function(nv)                     {
@@ -668,7 +712,7 @@ trcraftingbuddy.directive('skills', [function()                                 
             $scope.craftingOnly = !params.crafting || params.crafting == '1';
             $scope.search       = '';
             $scope.store        = function()                                    {
-                if (type && $scope.selected) store.add(type, $scope.selected);
+                if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
             };
             //
             $scope.$on('$locationChangeStart', function(nv)                     {
@@ -755,7 +799,7 @@ trcraftingbuddy.directive('species', [function()                                
             $scope.harvestableOnly  = false;
             $scope.search           = '';
             $scope.store            = function()                                {
-                if (type && $scope.selected) store.add(type, $scope.selected);
+                if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
             };
             //
             $scope.$on('$locationChangeStart', function(nv)                     {
@@ -834,18 +878,60 @@ trcraftingbuddy.directive('storeList', [function()                              
         },
         replace:        true,
         templateUrl:    'html/templates/storeList.html',
-        controller:     ['$scope', '$location', 'store', 'data', function($scope, $location, store, data) {
-            $scope.items = [];
+        controller:     ['$scope', 'store', function($scope, store)                 {
+            $scope.elements = [];
+
+            store.$on('changed', function(elements) { updateItems();                });
             
-            $scope.$watch(function () {return store.items;}, function(nv)       {
-                $scope.items = nv;
-            });
-            
-            
+            function updateItems()                                                  {
+                $scope.elements.length  = 0;
+                for (var i in store.elements) $scope.elements.push(store.elements[i]);
+            }
+            updateItems();
         }]
     };
 }]);
 
+trcraftingbuddy.directive('storeListElement', [function()                                  {
+    return {
+        scope:      {
+            type:       '=',
+            id:         '=',
+            remove:     '&',
+            view:       '&',
+            blueprint:  '&'
+        },
+        replace:        true,
+        templateUrl:    'html/templates/storeListElement.html',
+        controller:     ['$scope', '$location', 'data', function($scope, $location, data) {
+            $scope.element      = null;
+            $scope.hasBlueprint = null;
+            $scope.$watch('id', function(nv) { loadElement();                       });
+
+            function loadElement()                                                  {
+                if (!$scope.type || !$scope.id) return;
+                
+                var request = null;
+                switch($scope.type)                                                 {
+                    case 'skill':       request = data.getSkill($scope.id);     break;
+                    case 'recipe':      request = data.getRecipe($scope.id);    break;
+                    case 'component':   request = data.getComponent($scope.id); break;
+                    case 'filter':      request = data.getFilter($scope.id);    break;
+                    case 'item':        request = data.getItem($scope.id);      break;
+                    case 'specie':      request = data.getSpecie($scope.id);    break;
+                    default: break;
+                }
+                if (request) request.$on('loaded', function(data)                   {
+                    $scope.element          = data || null;
+                    $scope.hasBlueprint     = ($scope.type == 'item' && $scope.element.resultOf && $scope.element.resultOf.length);
+                });
+            }
+            
+            if (data.loaded) loadElement();
+            else data.$on('loaded', function(){ loadElement();                      });
+        }]
+    };
+}]);
 trcraftingbuddy.directive('viewport', [function()                               {
     return {
         replace:        true,
@@ -887,8 +973,7 @@ trcraftingbuddy.factory('elementController', ['data', 'store' , '$location', fun
             var controller  = base || {};
             $scope.element  = null;
             $scope.store    = function()                                            {
-                if (controller.type && $scope.element)
-                    store.add(controller.type, $scope.element);
+                if (controller.type && $scope.element) store.add(controller.type, $scope.element?$scope.element.id:0);
             };
             $scope.view     = function()                                            {
                 if (!controller.type || !$scope.element) return;
@@ -1244,79 +1329,66 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
     return service
 }]);
 
-trcraftingbuddy.service('store', ['$rootScope', '$location', 'data', function($rootScope, $location, data) {
+trcraftingbuddy.service('store', ['observable', '$rootScope', '$location', function(observable, $rootScope, $location) {
     //
-    var service = { items: [] };
-    service.add = function (type, element)                                      {
-        if (!type || !element) return null;
+    var service = observable.create({ elements: [] });
+    
+    
+    service.add = function (type, id)                                           {
+        if (!type || !id) return null;
         //
-        var item            = {type: type, element: element};
-        item.remove         = function ()                                       {
-            var index       = service.items.indexOf(item);
+        var element         = {type: type, id: id};
+        element.remove      = function ()                                       {
+            var index       = service.elements.indexOf(element);
             if (index < 0) return;
-            service.items.splice(index, 1);
+            service.elements.splice(index, 1);
             //
             store           = '';
-            for (var i in service.items)
-                store += (store?',':'') + service.items[i].type + ':' + service.items[i].element.id;
+            for (var i in service.elements) store += (store?',':'') + service.elements[i].type + ':' + service.elements[i].id;
             var params      = $location.search();
             params.store    = store;
             $location.search(params);
+            service.$broadcast('changed', service.elements);
         };
-        item.view           = function ()                                       {
+        element.view            = function ()                                   {
             var params          = $location.search();
             params.type         = type;
-            params[params.type] = element.id;
+            params[params.type] = id;
             $location.search(params);
         };
-        item.blueprint          = function ()                                   {
+        element.blueprint       = function ()                                   {
             var params          = $location.search();
             params.type         = 'blueprint';
-            params.blueprint    = element.id;
+            params.blueprint    = id;
             $location.search(params);
         };
-        item.hasBlueprint       = (type == 'item' && element.resultOf && element.resultOf.length); 
-        service.items.push(item);
-        store += (store?',':'') + type + ':' + element.id;
+        service.elements.push(element);
+        store += (store?',':'') + element.type + ':' + element.id;
         var params      = $location.search();
         params.store    = store;
         $location.search(params);
+        service.$broadcast('changed', service.elements);
         //
-        return item;
+        return element;
     }
     //
     var store = '';
     function parseStore(newStore)                                               {
         store                   = '';
-        service.items.length    = 0;
+        service.elements.length    = 0;
         var pairs = newStore.split(',');
         for (var i in pairs)                                                {
             var pair    = pairs[i].split(':'); if (pair.length != 2) continue;
             var type    = pair[0];
             var id      = pair[1];
-            var request = null;
-            switch(pair[0])                                                 {
-                case 'skill':       request = data.getSkill(id);        break;
-                case 'recipe':      request = data.getRecipe(id);       break;
-                case 'component':   request = data.getComponent(id);    break;
-                case 'filter':      request = data.getFilter(id);       break;
-                case 'item':        request = data.getItem(id);         break;
-                case 'specie':      request = data.getSpecie(id);       break;
-                default: break;
-            }
-            if (request) request.$on('loaded', function(data){
-                service.add(type, data); 
-            }) 
+            service.add(type, id);
         }
     }
     $rootScope.$on('$locationChangeStart', function(nv)                         {
         var params          = $location.search();
-        if (store != params.store && data.loaded) parseStore(params.store || '');
+        if (store != params.store) parseStore(params.store || '');
     });
-    if (data.loaded) parseStore($location.search().store || '');
-    else data.$on('loaded', function(){
-        parseStore($location.search().store || '');
-    });
+    parseStore($location.search().store || '');
     //
     return service
 }]);

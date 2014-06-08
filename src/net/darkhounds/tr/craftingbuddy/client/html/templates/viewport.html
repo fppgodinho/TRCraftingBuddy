@@ -1,8 +1,6 @@
 <div class="viewport" data-ng-show="ready">
     <div>
-<!--
         <button data-ng-click="type='blueprint'"    data-ng-disabled="type=='blueprint'">Blueprint</button>
--->
         <button data-ng-click="type='item'"         data-ng-disabled="type=='item'">Item</button>
         <button data-ng-click="type='recipe'"       data-ng-disabled="type=='recipe'">Recipe</button>
         <button data-ng-click="type='skill'"        data-ng-disabled="type=='skill'">Skill</button>
@@ -11,15 +9,13 @@
         <button data-ng-click="type='specie'"       data-ng-disabled="type=='specie'">Specie</button>
     </div>
     
-<!--
-    <div data-blueprints    data-model="blueprint"  data-ng-show="type=='blueprint'"></div>
--->
+    <div data-blueprints    data-ng-show="type=='blueprint'"></div>
     <div data-items         data-ng-show="type=='item'"></div>
     <div data-recipes       data-ng-show="type=='recipe'"></div>
     <div data-skills        data-ng-show="type=='skill'"></div>
     <div data-components    data-ng-show="type=='component'"></div>
-    <div data-filters       data-model="filter"     data-ng-show="type=='filter'"></div>
-    <div data-species       data-model="specie"     data-ng-show="type=='specie'"></div>
+    <div data-filters       data-ng-show="type=='filter'"></div>
+    <div data-species       data-ng-show="type=='specie'"></div>
     <div data-store-list></div>
     
 </div>

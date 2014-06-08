@@ -1,11 +1,11 @@
 <div class="blueprint">
-    <div class="field">Items: {{items.length}}</div>
+    <div class="field">Items: {{elements.length}}</div>
     <input data-ng-model="search" placeholder="filter" />
-    <button data-ng-disabled="!model" data-ng-click="model.store()">+</button>
-    <select data-ng-model="model" data-ng-options="item.name for item in items | orderBy:'name' | filter:{name:search}"></select>
+    <button data-ng-disabled="!selected" data-ng-click="store()">+</button>
+    <select data-ng-model="selected" data-ng-options="element.name for element in elements"></select>
     
-    <select class="red" data-ng-show="blueprint.recipes.length"  data-ng-model="recipe" data-ng-options="recipe.name for recipe in blueprint.recipes | orderBy:'name'" data-ng-change="blueprint.selectRecipe(recipe)"></select>
+    <select class="red" data-ng-show="selected.recipes.length"  data-ng-model="recipe" data-ng-options="recipe.name for recipe in selected.recipes" data-ng-change="selected.selectRecipe(recipe)"></select>
     
-    <div data-model="blueprint.selected" data-blueprints-recipe ></div>
+    <div data-model="recipe" data-blueprints-recipe ></div>
     
 </div>

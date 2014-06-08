@@ -1,14 +1,11 @@
-<div class="store">
+<div class="store-list">
     <div class="header">
         <div>Stored:</div>
     </div>
     <div class="list">
         <div>
-            <div data-ng-repeat="item in items" class="field">
-                <button data-ng-click="item.remove()">x</button>
-                <div class="column" style="width: 80px">{{item.type}}</div>
-                <a href="javascript: void(0)" data-ng-click="item.view()">{{item.element.name}}</a>
-                <button data-ng-click="item.blueprint()" data-ng-show="item.hasBlueprint">Blueprint</button>
+            <div data-ng-repeat="element in elements" class="field">
+                <div data-store-list-element data-type="element.type" data-id="element.id" data-remove="element.remove()" data-view="element.view()" data-blueprint="element.blueprint()"></div>
             </div>
         </div>
     </div>

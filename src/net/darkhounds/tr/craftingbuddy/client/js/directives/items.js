@@ -10,10 +10,9 @@ trcraftingbuddy.directive('items', [function()                                  
             $scope.crafted      = false;
             $scope.harvested    = false;
             $scope.other        = false;
-            $scope.crafted      = false;
             $scope.search       = '';
             $scope.store        = function()                                    {
-                if (type && $scope.selected) store.add(type, $scope.selected);
+                if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
             };
             //
             $scope.$on('$locationChangeStart', function(nv)                     {
