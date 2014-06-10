@@ -1,6 +1,7 @@
-<div class="item" data-ng-show="model && model.item && model.item.id">
-    
-    <select class="red" data-ng-show="model.recipes.length" data-ng-model="recipe" data-ng-options="recipe.name for recipe in model.recipes | orderBy:'name'" data-ng-change="model.selectRecipe(recipe)"></select>
+<div class="blueprints-item" data-ng-show="item && item.id">
+    <button data-ng-click="store()" data-ng-disabled="!item || !item.id">+</button>
+    <a href="javascript: void(0)" data-ng-click="view()">{{item.name}}</a>
+    <select class="red" data-ng-show="recipes.length > 1" data-ng-model="recipe" data-ng-options="recipe.name for recipe in recipes"></select>
     
     <div id="RECIPE"></div>
     

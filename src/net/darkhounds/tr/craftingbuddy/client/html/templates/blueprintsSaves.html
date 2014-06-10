@@ -1,0 +1,7 @@
+<div class="blueprints-saves">
+    <div class="field">Blueprints: {{elements.length}}</div>
+    <input data-ng-model="search" placeholder="filter" />
+    <select data-ng-model="selected" data-ng-options="element.name for element in elements"></select>
+    <button data-ng-click="save()">Save Current Blueprint</button>
+    Name:<input data-ng-model="name"/>
+</div>

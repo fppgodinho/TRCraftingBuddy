@@ -35,7 +35,7 @@ trcraftingbuddy.directive('storeListElement', [function()                       
             $scope.$watch('id', function(nv) { loadElement();                       });
 
             function loadElement()                                                  {
-                if (!$scope.type || !$scope.id) return;
+                if (!data.loaded || !$scope.type || !$scope.id) return;
                 
                 var request = null;
                 switch($scope.type)                                                 {

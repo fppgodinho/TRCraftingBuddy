@@ -1,11 +1,6 @@
 <div class="blueprint">
-    <div class="field">Items: {{elements.length}}</div>
-    <input data-ng-model="search" placeholder="filter" />
-    <button data-ng-disabled="!selected" data-ng-click="store()">+</button>
-    <select data-ng-model="selected" data-ng-options="element.name for element in elements"></select>
+    <div data-blueprints-saves data-id="itemID"></div>
+    <div data-blueprints-items data-id="itemID"></div>
     
-    <select class="red" data-ng-show="selected.recipes.length"  data-ng-model="recipe" data-ng-options="recipe.name for recipe in selected.recipes" data-ng-change="selected.selectRecipe(recipe)"></select>
-    
-    <div data-model="recipe" data-blueprints-recipe ></div>
-    
+    <div data-element="blueprint" data-blueprints-item></div>
 </div>

@@ -2,7 +2,6 @@ trcraftingbuddy.service('store', ['observable', '$rootScope', '$location', funct
     //
     var service = observable.create({ elements: [] });
     
-    
     service.add = function (type, id)                                           {
         if (!type || !id) return null;
         //

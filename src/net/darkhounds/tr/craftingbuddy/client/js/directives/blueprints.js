@@ -3,118 +3,366 @@ trcraftingbuddy.directive('blueprints', [function()                             
         scope:          {},
         replace:        true,
         templateUrl:    'html/templates/blueprints.html',
-        controller:     ['$scope', 'data', 'store', '$location', function($scope, data, store, $location) {
-            $scope.selected     = false;
-            $scope.elements     = [];
-            $scope.search       = '';
-            $scope.store        = function()                                    {
-                if ($scope.selected) store.add('item', $scope.selected?$scope.selected.id:0);
-            };
-            //
-            $scope.$on('$locationChangeStart', function(nv)                     {
+        controller:     ['$scope', 'data', 'store', 'blueprint', '$location', function($scope, data, store, blueprint, $location) {
+            $scope.itemID       = $location.search().blueprint;
+            $scope.blueprint    = null;
+            
+            function parseLocation()                                            {
                 var params      = $location.search();
-                for (var i in $scope.elements)
-                    if ($scope.elements[i].id == params.blueprint)
-                        $scope.selected = $scope.elements[i];
-            });
-            //
-            $scope.$watch('selected', function(nv)                              {
-                var params  = $location.search();
-                if (!$scope.selected) return;
-                params.blueprint    = $scope.selected.id;
+                $scope.itemID   = params.blueprint || $scope.itemID;
+            }
+            $scope.$on('$locationChangeStart', function (nv) { parseLocation(); });
+            
+            $scope.$watch('itemID', function (nv)                               {
+                if (!nv) return;
+                $scope.blueprint    = blueprint.initialize(nv);
+                var params          = $location.search();
+                params.blueprint    = nv || '';
                 $location.search(params);
             });
+        }]
+    };
+}]);
+
+trcraftingbuddy.directive('blueprintsSaves', ['data', 'blueprint', function(data, blueprint) {
+    return {
+        scope:          {
+            id:         '='
+        },
+        replace:        true,
+        templateUrl:    'html/templates/blueprintsSaves.html',
+        controller:     ['$scope', function ($scope)                            {
+            $scope.elements     = [];
+            $scope.selected     = null;
+            $scope.name         = '';
             //
-            $scope.$watch('search', function(nv)                                {
+            $scope.save         = function()                                    {
+                var blueprintData   = blueprint.getBlueprint();
+                var name            = ($scope.selected && $scope.selected.id)?$scope.selected.name:$scope.name;
+                var element         = {
+                    name: name,
+                    data: blueprintData
+                } 
+                if ($scope.selected && $scope.selected.id) element.id = $scope.selected.id;
+                
+                data.saveBlueprint(element).$on('saved', function(data)         {
+                    // $scope.selected = data;
+                    getData();
+                    console.log('Saved?', data);
+                });
+            }
+            
+            $scope.$watch('selected', function(nv)                              {
+                console.log('Loaded?', nv);
+                if (nv && nv.id) blueprint.loadBlueprint(nv.data);
+                $scope.name = (nv && nv.id)?nv.name:'';
+            })
+            
+            function getData()                                                  {
+                data.getBlueprints($scope.search).$on('loaded', function (data) {
+                    $scope.elements.length  = 0;
+                    $scope.elements.push({name: '-'});
+                    $scope.selected = $scope.elements[0]; 
+                    data                    = data || [];
+                    for (var i in data) $scope.elements.push(data[i]);
+                });
+            }
+            if (!data.loaded) data.$on('loaded', getData); else getData();
+        }]
+    }
+}]);
+
+trcraftingbuddy.directive('blueprintsItems', ['data', 'store', function(data, store) {
+    return {
+        scope:          {
+            id:         '='
+        },
+        replace:        true,
+        templateUrl:    'html/templates/blueprintsItems.html',
+        controller:     ['$scope', function ($scope)                            {
+            $scope.search   = '';
+            $scope.elements = [];
+            $scope.selected = false;
+            $scope.store    = function ()                                       {
+                if ($scope.selected) store.add('item', $scope.selected ? $scope.selected.id : 0);
+            };
+            //
+            $scope.$watch('id', function (nv)                                   {
                 if (!data.loaded) return;
-                getData();
+                checkSelected();
             });
             //
-            function loadData()                                                 {
-                data.$on('loaded', getData );
+            $scope.$watch('search', function (nv)                               {
+                if (!data.loaded) return;
+                getData(true, false);
+            });
+            //
+            $scope.$watch('selected', function (nv)                             {
+                if (!nv) return;
+                $scope.id   = nv.id;
+            });
+            //
+            function checkSelected()                                            {
+                if ($scope.elements) for (var i in $scope.elements)
+                    if ((($scope.search || !$scope.id) && $scope.elements.length.length == 1) || $scope.id == $scope.elements[i].id)
+                        $scope.selected     = $scope.elements[i];
             }
             //
             function getData()                                                  {
-                data.getItems($scope.search).$on('loaded', function(data)       {
+                data.getItems($scope.search).$on('loaded', function (data)      {
                     $scope.elements.length  = 0;
-                    var list                = data || [];
-                    var params              = $location.search();
-                    for (var i in list)                                         {
-                        if (!list[i].resultOf || !list[i].resultOf.length) continue;
-
-                        $scope.elements.push(list[i]);
-                        if ((($scope.search || !params.blueprint) && $scope.elements.length == 1) || (params.type == 'blueprint' && params.blueprint == list[i].id))
-                            $scope.selected = list[i];
+                    var data                = data || [];
+                    for (var i in data)                                         {
+                        if (!data[i].resultOf || !data[i].resultOf.length) continue;
+                        $scope.elements.push(data[i]);
                     }
+                    checkSelected();
                 });
             }
-            //
-            if (!data.loaded) loadData(); else getData();
-            
-//            $scope.search       = '';
-//            $scope.items        = [];
-//            $scope.recipe       = null;
-//            
-//            $scope.$watch(function(){ return data.loaded; }, function(nv)       {
-//                $scope.items.length = 0;
-//                for (var id in data.items) $scope.items.push(data.items[id]);
-//            });
-//            
-//            $scope.$watch('model', function(nv)                                 {
-//                if (!nv) return;
-//                //
-//                $scope.blueprint        = blueprint.initialize(nv);
-//                $scope.recipe           = $scope.blueprint.selected?$scope.blueprint.selected.recipe:null;
-//            });
-//            
-//            $scope.$watch('search', function(nv)                                {
-//                if (!data.loaded || !nv) return;
-//                //
-//                if ($scope.items && $scope.items.length) for (var i in $scope.items)
-//                    if ($scope.items[i].name.toLowerCase().indexOf(nv.toLowerCase()) >= 0)
-//                        $scope.model = $scope.items[i];
-//            });
+            if (!data.loaded) data.$on('loaded', getData); else getData();
         }]
-    };
+    }
 }]);
 
-trcraftingbuddy.directive('blueprintsItem', [function()                         {
+trcraftingbuddy.directive('blueprintsItem', ['blueprintController', function(blueprintController) {
     return {
-        scope:      {
-            model:  '='
+        scope:          {
+            element:         '='
         },
         replace:        true,
         templateUrl:    'html/templates/blueprintsItem.html',
-        controller:     ['$scope', '$compile', '$element', function($scope, $compile, $element) {
-            $scope.recipes  = [];
-            $scope.recipe   = null;
-
-            $scope.$watch('model', function(nv)                                 {
-                if (!nv) return;
+        controller:     ['$scope', '$compile', '$element', function ($scope, $compile, $element) {
+            var controller      = blueprintController.create($scope, 'item');
+            $scope.item         = null;
+            $scope.recipes      = [];
+            $scope.recipe       = null;
+            $scope.blueprint    = null;
+            //
+            controller.addEventRemover($scope.$watch('element', function(nv)    {
+                controller.getData();
+            }));
+            
+            controller.addEventRemover( $scope.$watch('recipe', function(nv)    {
+                $scope.blueprint    = nv?$scope.element.addRecipe(nv.id):null;
                 //
-                $scope.recipe = nv.selected?nv.selected.recipe:null;
-            });
-
-            $scope.$watch('recipe', function(nv)                                {
-                var recipe  = $element.find('#RECIPE').empty(); if (!nv) return;
-                var node    = angular.element('<div data-model="model.selected" data-blueprints-recipe></div>').appendTo(recipe);
-                $compile(node)($scope);
-            });
+                if (!nv) return;
+                var recipe      = $element.find('#RECIPE').empty();
+                var template    = angular.element('<div data-blueprints-recipe data-element="blueprint"></div>').appendTo(recipe);
+                $compile(template)($scope);
+            }));
+            
+            //
+            controller.getData = function()                                     {
+                if (!controller.data.loaded) return;
+                controller.clearLoadEvents();
+                $scope.item             = null;
+                $scope.recipe           = null;
+                if ($scope.element && $scope.element.id) controller.addLoadEventRemover(
+                    controller.data.getItem($scope.element.id).$on('loaded', function (dataItem) {
+                        $scope.item             = dataItem;
+                        $scope.recipes.length   = 0;
+                        $scope.recipes.push({name: '-'});
+                        $scope.recipe           = $scope.recipes[0];
+                        for (var i in dataItem.resultOf) controller.addLoadEventRemover(
+                            controller.data.getRecipe(dataItem.resultOf[i] + '').$on('loaded', function(dataRecipe){
+                                $scope.recipes.push(dataRecipe);
+                            })
+                        );
+                    })
+                );
+            }
         }]
-    };
+    }
 }]);
 
-trcraftingbuddy.directive('blueprintsRecipe', [function()                        {
+trcraftingbuddy.directive('blueprintsRecipe', ['blueprintController', function(blueprintController) {
     return {
-        scope:      {
-            model: '='
+        scope:          {
+            element:         '='
         },
         replace:        true,
         templateUrl:    'html/templates/blueprintsRecipe.html',
-        controller:     ['$scope', function($scope)                             {
-            $scope.$watch('model', function(nv)                                 {
-                if (!nv) return;
-            });
+        controller:     ['$scope', '$element', function ($scope, $element)      {
+            var controller      = blueprintController.create($scope, 'recipe');
+            $scope.recipe       = null;
+            $scope.result       = null;
+            $scope.ingredients  = [];
+            $scope.ingredient   = null;
+            $scope.agents       = [];
+            $scope.agent        = null;
+            //
+            $element.bind('$destroy', function(e) { $scope.$destroy();          });
+            
+            controller.addEventRemover($scope.$watch('element', function(nv)    {
+                controller.getData();
+            }));
+            //
+            controller.getData  = function()                                    {
+                if (!controller.isInitialized() || !controller.data.loaded || ($scope.recipe && $scope.element && $scope.recipe.id == $scope.element.id)) return;
+                controller.clearLoadEvents();
+                $scope.recipe           = null;
+                //
+                if ($scope.element && $scope.element.id) controller.addLoadEventRemover(
+                    controller.data.getRecipe($scope.element.id).$on('loaded', function (dataRecipe) {
+                        $scope.recipe               = dataRecipe;
+                        $scope.result               = null;
+                        $scope.ingredients.length   = 0;
+                        $scope.agents.length        = 0;
+                        //
+                        for (var i in $scope.recipe.results)
+                            if ($scope.recipe.results[i].id == $scope.element.parent.id)
+                                $scope.result   = $scope.recipe.results[i]; 
+                        if (!$scope.result) return;
+                        //
+                        var filters = [$scope.result.filter1, $scope.result.filter2, $scope.result.filter3, $scope.result.filter4];
+                        //
+                        for (var i in $scope.recipe.ingredients)    getIngredient(i, filters);
+                        for (var i in $scope.recipe.agents)         getAgent(i);
+                    })
+                );
+            }
+            function getIngredient(id, filters)                                 {
+                controller.addLoadEventRemover(
+                    controller.data.getComponent($scope.recipe.ingredients[id] + '').$on('loaded', function(dataComponent){
+                        $scope.ingredients.push({blueprint: $scope.element, component: dataComponent, filter: filters[id], pos: id});
+                    })
+                );
+            }
+            function getAgent(id)                                               {
+                controller.addLoadEventRemover(
+                    controller.data.getComponent($scope.recipe.agents[id] + '').$on('loaded', function(dataComponent){
+                        $scope.agents.push({blueprint: $scope.element, component: dataComponent, pos: id});
+                    })
+                );
+            }
         }]
-    };
+    }
+}]);
+
+trcraftingbuddy.directive('blueprintsRecipeSkill', ['blueprintController', function(blueprintController) {
+    return {
+        scope:          {
+            id: '='
+        },
+        replace:        true,
+        templateUrl:    'html/templates/blueprintsRecipeSkill.html',
+        controller:     ['$scope', function ($scope)                            {
+            var controller      = blueprintController.create($scope, 'skill');
+            $scope.skill        = null;
+            //
+            controller.addEventRemover( $scope.$watch('id', function(nv)        {
+                controller.getData();
+            }));
+            //
+            controller.getData = function()                                     {
+                if (!controller.isInitialized() || !controller.data.loaded) return;
+                controller.clearLoadEvents();
+                $scope.skill = null;
+                if ($scope.id) controller.addLoadEventRemover(
+                    controller.data.getSkill($scope.id).$on('loaded', function (dataSkill) {
+                        $scope.skill   = dataSkill;
+                    })
+                );
+            }
+        }]
+    }
+}]);
+
+trcraftingbuddy.directive('blueprintsRecipeIngredient', ['blueprintController', function(blueprintController) {
+    return {
+        scope:          {
+            ingredient: '='
+        },
+        replace:        true,
+        templateUrl:    'html/templates/blueprintsRecipeIngredient.html',
+        controller:     ['$scope', function ($scope)                            {
+            var controller      = blueprintController.create($scope, 'component');
+            $scope.component    = null;
+            $scope.filter       = null;
+            $scope.items        = [];
+            $scope.item         = null;
+            $scope.blueprint    = null;
+            //
+            controller.addEventRemover($scope.$watch('component', function(nv)  {
+                controller.getData();
+            }));
+            controller.addEventRemover($scope.$watch('item', function(nv)       {
+                if (!$scope.ingredient) return;
+                $scope.blueprint = nv?$scope.ingredient.blueprint.addIngredient($scope.ingredient.pos, $scope.item.id, $scope.filter?$scope.filter.id:null):null;
+            }));
+            //
+            controller.getData = function()                                     {
+                if (!controller.isInitialized() || !controller.data.loaded || ($scope.component && $scope.ingredient && $scope.ingredient.component && $scope.component.id == $scope.ingredient.component.id)) return;
+                controller.clearLoadEvents();
+                $scope.items.length = 0;
+                $scope.component    = $scope.ingredient?$scope.ingredient.component:null;
+                $scope.filter       = null;
+                $scope.item         = null;
+                //
+                if ($scope.ingredient && $scope.ingredient.filter) controller.addLoadEventRemover(
+                    controller.data.getFilter($scope.ingredient.filter + '').$on('loaded', function (dataFilter) {
+                        $scope.filter   = dataFilter;
+                        getItems();
+                    })
+                ); else if($scope.component && $scope.component.id) getItems();
+            }
+            //
+            function getItems()                                                 {
+                $scope.items.length = 0;
+                $scope.items.push({name: '-'});
+                $scope.item = $scope.items[0];
+                
+                var items   = $scope.filter?$scope.filter.items:$scope.component.items;
+                
+                for (var i in items) controller.addLoadEventRemover(
+                    controller.data.getItem(items[i] + '').$on('loaded', function(dataItem){
+                        $scope.items.push(dataItem);
+                    })
+                );
+            }
+        }]
+    }
+}]);
+
+trcraftingbuddy.directive('blueprintsRecipeAgent', ['blueprintController', function(blueprintController) {
+    return {
+        scope:          {
+            agent:      '='
+        },
+        replace:        true,
+        templateUrl:    'html/templates/blueprintsRecipeAgent.html',
+        controller:     ['$scope', function ($scope)                            {
+            var controller      = blueprintController.create($scope, 'component');
+            $scope.component    = null;
+            $scope.items        = [];
+            $scope.item         = null;
+            $scope.blueprint    = null;
+            //
+            controller.addEventRemover($scope.$watch('component', function(nv)  {
+                controller.getData();
+            }));
+            controller.addEventRemover($scope.$watch('item', function(nv)       {
+                if (!$scope.agent) return;
+                $scope.blueprint = nv?$scope.agent.blueprint.addAgent($scope.agent.pos, $scope.item.id):null;
+            }));
+            //
+            controller.getData = function()                                     {
+                if (!controller.isInitialized() || !controller.data.loaded || ($scope.component && $scope.agent && $scope.agent.component && $scope.component.id == $scope.agent.component.id)) return;
+                controller.clearLoadEvents();
+                $scope.items.length = 0;
+                $scope.component    = $scope.agent?$scope.agent.component:null;
+                //
+                if ($scope.component && $scope.component.id)                    {
+                    $scope.items.push({name: '-'});
+                    $scope.item = $scope.items[0];
+                    var items   = $scope.component.items;
+                    for (var i in items) controller.addLoadEventRemover(
+                        controller.data.getItem(items[i] + '').$on('loaded', function(dataItem){
+                            $scope.items.push(dataItem);
+                        })
+                    );
+                }
+            }
+        }]
+    }
 }]);

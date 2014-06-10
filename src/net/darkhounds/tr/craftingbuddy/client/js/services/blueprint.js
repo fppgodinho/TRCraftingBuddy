@@ -1,75 +1,74 @@
-trcraftingbuddy.service('blueprint', ['data', function(data)                    {
+trcraftingbuddy.service('blueprint', ['observable', 'data', '$rootScope', function(observable, data, $rootScope) {
     //
-    var service         = {};
-    
-    var rootItem = null;
-    service.initialize  = function(item)                                        {
-        rootItem = createItem(item);
-        return rootItem;
-    }
-    
-    service.getRootItem = function() { return rootItem;                         }
-    
-    function createItem(item)                                                   {
-        if (!item) return null;
+    var service             = observable.create({});
+    var blueprint           = {};
+    service.initialize      = function(id)                                      {
+        blueprint       = {id: id, parent: null};
+        Object.defineProperty(blueprint, 'addRecipe',                           {
+            enumerable:     false,
+            configurable:   false,
+            writable:       false,
+            value:          function(id){ return addRecipe(blueprint, id); }
+        });
         //
-        var element = { item: item, recipes:[]};
-        if (item.resultOf) for (var i in item.resultOf) element.recipes.push(item.resultOf[i]);
-        if (element.recipes.length)                                             {
-            element.recipes.unshift({name: '-'});
-            element.selected    = createRecipe(element.recipes[0], {});
-        }
+        return blueprint; 
+    };
+    
+    function addRecipe (parent, id)                                             {
+        var recipe      = {id: id, parent: parent, ingredients:[], agents:[]};
+        //
+        Object.defineProperty(recipe, 'addIngredient',                          {
+            enumerable:     false,
+            configurable:   false,
+            writable:       false,
+            value:          function(pos, id, filter){ return addIngredient(recipe, pos, id, filter);  }
+        });
+        Object.defineProperty(recipe, 'addAgent',                               {
+            enumerable:     false,
+            configurable:   false,
+            writable:       false,
+            value:          function(pos, id) { return addAgent(recipe, pos, id); }
+        });
+        parent.recipe   = recipe;
+        //
+        return recipe;
+    };
+    
+    function addIngredient(parent, pos, id, filter)                             {
+        var ingredient = {id: id, parent: parent, filter: filter};
+        //
+        Object.defineProperty(ingredient, 'addRecipe',                          {
+            enumerable:     false,
+            configurable:   false,
+            writable:       false,
+            value:          function(id) { return addRecipe(ingredient, id);    }
+        });
+        parent.ingredients[pos] = ingredient;
+        //
+        return ingredient;
         
-        element.selectRecipe    = function(recipe)                              {
-            element.selected    = createRecipe(recipe, item);
-        }
-        //
-        return element;
     }
     
-    function createRecipe(recipe, item)                                         {
-        if (!recipe || !item) return null;
+    function addAgent(parent, pos, id)                                          {
+        var agent = {id: id, parent: parent};
         //
-        var result  = null;
-        if (recipe.results)
-            for (var i in recipe.results)
-                if (recipe.results[i].item.id == item.id) result = recipe.results[i];
+        Object.defineProperty(agent, 'addRecipe',                               {
+            enumerable:     false,
+            configurable:   false,
+            writable:       false,
+            value:          function(id) { return addRecipe(agent, id);         }
+        });
+        parent.agents[pos]  = agent;
         //
-        var element = { recipe: recipe, result: result, ingredients: [], agents: []};
-        //
-        if (element.result)                                                     {
-            for (var i in recipe.ingredients)                                   {
-                var filter      = element.result['filter'+(+i+1)];
-                var ingredient  = createComponent(element.recipe.ingredients[i], filter)
-                if (ingredient) element.ingredients.push(ingredient);
-            }
-            for (var i in recipe.agents)                                        {
-                var agent       = createComponent(element.recipe.agents[i]);
-                if (agent) element.agents.push(agent);
-            }
-        }
-        //
-        return element;
+        return agent;
     }
-    
-    function createComponent(component, filter)                                 {
-        if (!component) return null;
-        //
-        var element         = {component: component, filter: (filter && filter.id)?filter:null, items:[]};
-        var items           = (filter && filter.id)?filter.items:component.items;
-        
-        for (var i in items) element.items.push(items[i]);
-        if (element.items.length)                                               {
-            element.items.unshift({name: '-'});
-            element.selected    = createItem(element.items[0]);
-        }
-        //
-        element.selectItem  = function(item)                                    {
-            element.selected    = createItem(item);
-        }
-        //
-        return element;
-    }
+
+    service.getBlueprint    = function() { return blueprint;                    }
+    service.loadBlueprint   = function(blueprint)                               {
+        blueprint           = blueprint;
+        // TODO: parse the object to inflat it's methods...
+        service.$broadcast('loaded', blueprint);
+    };
     
     return service
 }]);

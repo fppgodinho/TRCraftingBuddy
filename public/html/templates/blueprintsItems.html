@@ -1,0 +1,5 @@
+<div class="blueprints-items">
+    <div class="field">Items: {{elements.length}}</div>
+    <input data-ng-model="search" placeholder="filter" />
+    <select data-ng-model="selected" data-ng-options="element.name for element in elements"></select>
+</div>

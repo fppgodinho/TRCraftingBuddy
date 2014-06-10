@@ -1,0 +1,8 @@
+<div class="blueprints-recipe-ingredient" data-show="ingredient && ingredient.id">
+    <a href="javascript: void(0)" data-ng-click="view()">{{component.name}}</a> <span data-ng-show="filter">(<a href="javascript: void(0)" data-ng-click="viewFilter()">{{filter.name}})</a></span>:
+    <div class="block item">
+        <select class="blue" data-ng-show="items.length > 1 && !item.id" data-ng-model="item" data-ng-options="item.name for item in items"></select>
+        <button data-ng-show="items.length > 1 && item.id" data-ng-click="reset()">x</button>
+        <div class="block item" data-element="blueprint" data-blueprints-item></div>
+    </div>
+</div>

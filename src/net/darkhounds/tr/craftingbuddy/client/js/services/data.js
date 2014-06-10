@@ -4,18 +4,29 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
     if (!$window.IDBKeyRange)       $window.IDBKeyRange     = $window.webkitIDBKeyRange || $window.msIDBKeyRange;
     //
     var service             = observable.create({loaded: false});
+    //
     service.getSkills       = function(filter) { return getFilteredByName(db, 'skills',     filter); };
-    service.getRecipes      = function(filter) { return getFilteredByName(db, 'recipes',    filter); };
-    service.getComponents   = function(filter) { return getFilteredByName(db, 'components', filter); };
-    service.getFilters      = function(filter) { return getFilteredByName(db, 'filters',    filter); };
-    service.getItems        = function(filter) { return getFilteredByName(db, 'items',      filter); };
-    service.getSpecies      = function(filter) { return getFilteredByName(db, 'species',    filter); };
     service.getSkill        = function(id) { return getByKey(db, 'skills',      id); };
+    //
+    service.getRecipes      = function(filter) { return getFilteredByName(db, 'recipes',    filter); };
     service.getRecipe       = function(id) { return getByKey(db, 'recipes',     id); };
+    //
+    service.getComponents   = function(filter) { return getFilteredByName(db, 'components', filter); };
     service.getComponent    = function(id) { return getByKey(db, 'components',  id); };
+    //
+    service.getFilters      = function(filter) { return getFilteredByName(db, 'filters',    filter); };
     service.getFilter       = function(id) { return getByKey(db, 'filters',     id); };
+    //
+    service.getItems        = function(filter) { return getFilteredByName(db, 'items',      filter); };
     service.getItem         = function(id) { return getByKey(db, 'items',       id); };
+    //
+    service.getSpecies      = function(filter) { return getFilteredByName(db, 'species',    filter); };
     service.getSpecie       = function(id) { return getByKey(db, 'species',     id); };
+    //
+    service.getBlueprints   = function(filter)  { return getFilteredByName(db, 'blueprints', filter); };
+    service.getBlueprint    = function(id) { return getByKey(db, 'blueprints',  id); };
+    service.saveBlueprint   = function(data) { return saveData(db, 'blueprints',  data);};
+    service.removeBlueprint = function(id) { return removeByKey(db, 'blueprints',  id);};
     //
     var db                  = null;
     //
@@ -26,7 +37,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         filters:    false,
         items:      false,
         species:    false
-    }
+    };
     //
     var request             = window.indexedDB.open("gameDB", 1);
     request.onerror         = function(event)                                   {
@@ -43,6 +54,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         intializeStore(DBSchema, 'filters');
         intializeStore(DBSchema, 'items');
         intializeStore(DBSchema, 'species');
+        intializeStore(DBSchema, 'blueprints', true);
     };
     request.onsuccess       = function(event)                                   {
         console.log('DB connection created');
@@ -58,8 +70,8 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         loadStore(db, 'species',    'data/species.json');
     };
     //
-    function intializeStore(DBSchema, name, src)                                {
-        var schema                      = DBSchema.createObjectStore(name, { keyPath: "id" });
+    function intializeStore(DBSchema, name, src, auto)                          {
+        var schema                      = DBSchema.createObjectStore(name, { keyPath: "id", autoIncrement: true });
         schema.createIndex("name", "name", { unique: false });
         return schema.transaction;
     }
@@ -68,13 +80,14 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         checker[name]           = false;
         //
         var store               = DBSchema.transaction([name]).objectStore(name);
-
+        
         store.count().onsuccess = function(e)                                   {
             if (!e.target.result) return $http({method: 'GET', url: src}).success(function(data) {
                 var store               = DBSchema.transaction([name], "readwrite").objectStore(name);
                 var count               = 0;
                 for (var i in data)                                             {
                     count++;
+                    
                     store.add(data[i]).onsuccess = function(e)                  {
                         if(--count <= 0)                                        {
                             checker[name]       = true;
@@ -83,7 +96,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
                     };
                 }
                 
-            })
+            });
             //
             checker[name]   = true;
             check();
@@ -93,10 +106,8 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
     function check()                                                            {
         if (!checker.skills || !checker.recipes || !checker.components || !checker.filters || !checker.items || !checker.species) return;
         //
-        $rootScope.$apply(function()                                            {
-            service.loaded  = true;
-            service.$broadcast('loaded');
-        });
+        service.loaded  = true;
+        service.$broadcast('loaded');
     }
     //
     function getFilteredByName(DBSchema, name, filter)                          {
@@ -107,7 +118,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         var cursor              = store.openCursor();
         cursor.onerror   = function(error)                                      {
             console.log('Error parsing stored data from ' + name, error);
-            $rootScope.$apply(function() { response.$broadcast('error', error); });
+            response.$broadcast('error', error);
         };
         cursor.onsuccess = function(e)                                          {
             var result = cursor.result || null;
@@ -115,14 +126,14 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
                 if (!filter || result.value.name.toLowerCase().indexOf(filter.toLowerCase()) >= 0)
                     response.data.push(result.value);
                 result.continue();
-            } else $rootScope.$apply(function()                                 {
+            } else                                                              {
                 response.data.sort(function(a, b)                               {
                     if(a.name < b.name) return -1;
                     if(a.name > b.name) return 1;
                     return 0;
                 });
                 response.$broadcast('loaded', response.data);
-            });
+            } 
         };
         //
         return response;
@@ -133,15 +144,42 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         //
         var request         = DBSchema.transaction([name]).objectStore(name).get(key);
         request.onerror     = function(error)                                   {
-            $rootScope.$apply(function()                                        {
-                response.$broadcast('error', error);
-            });
+            response.$broadcast('error', error);
         };
         request.onsuccess   = function(e)                                       {
-            $rootScope.$apply(function()                                        {
-                response.data   = request.result;
-                response.$broadcast('loaded', response.data);
-            });
+            response.data   = request.result;
+            response.$broadcast('loaded', response.data);
+        };
+        //
+        return response;
+    }
+    
+    function saveData(DBSchema, name, data)                                     {
+        var response        = observable.create({data: null});
+        //
+        console.log('About to save:', data);
+        var request         = DBSchema.transaction([name], "readwrite").objectStore(name).put(data);
+        request.onerror     = function(error)                                   {
+            response.$broadcast('error', error);
+        };
+        request.onsuccess   = function(e)                                       {
+            response.data   = request.result;
+            response.$broadcast('saved', response.data);
+        };
+        //
+        return response;
+    }
+    
+    function removeByKey(DBSchema, name, key)                                   {
+        var response        = observable.create({data: null});
+        //
+        var request         = DBSchema.transaction([name], "readwrite").objectStore(name).delete(key);
+        request.onerror     = function(error)                                   {
+            response.$broadcast('error', error);
+        };
+        request.onsuccess   = function(e)                                       {
+            response.data   = key;
+            response.$broadcast('removed', key);
         };
         //
         return response;
