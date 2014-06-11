@@ -1523,7 +1523,7 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', 'analytics', '$rootS
     }
     
     function addAgent(parent, pos, id)                                          {
-        analytics.register('blueprint/agent/' + id + '/pos/' + pos + '/filter/' + filter);
+        analytics.register('blueprint/agent/' + id + '/pos/' + pos);
         var agent = {id: id, parent: parent};
         //
         Object.defineProperty(agent, 'addRecipe',                               {
