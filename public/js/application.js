@@ -1809,7 +1809,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         species:    false
     };
     //
-    var request             = window.indexedDB.open("gameDB", 2);
+    var request             = window.indexedDB.open("gameDB", 3);
     request.onerror         = function(event)                                   {
         // browser access to indexDB denied by the user
         console.log('DB connection failed');
