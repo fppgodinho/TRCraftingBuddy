@@ -82,7 +82,6 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         var store               = DBSchema.transaction([name]).objectStore(name);
         
         store.count().onsuccess = function(e)                                   {
-            console.log(name, e.target.result);
             if (!e.target.result) return $http({method: 'GET', url: src}).success(function(data) {
                 var store               = DBSchema.transaction([name], "readwrite").objectStore(name);
                 var count               = 0;

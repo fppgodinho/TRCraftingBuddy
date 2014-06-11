@@ -995,9 +995,11 @@ trcraftingbuddy.directive('skills', [function()                                 
             }
             //
             function getData()                                                  {
+                console.log('Skills Data load...')
                 data.getSkills($scope.search).$on('loaded', function(data)      {
                     $scope.elements.length  = 0;
                     var list                = data || [];
+                    console.log('... loaded', list.length)
                     var params              = $location.search();
                     for (var i in list)                                         {
                         if ($scope.craftingOnly && (!list[i].recipes || !list[i].recipes.length)) continue;
@@ -1628,7 +1630,6 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         var store               = DBSchema.transaction([name]).objectStore(name);
         
         store.count().onsuccess = function(e)                                   {
-            console.log(name, e.target.result);
             if (!e.target.result) return $http({method: 'GET', url: src}).success(function(data) {
                 var store               = DBSchema.transaction([name], "readwrite").objectStore(name);
                 var count               = 0;

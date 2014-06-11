@@ -46,9 +46,11 @@ trcraftingbuddy.directive('skills', [function()                                 
             }
             //
             function getData()                                                  {
+                console.log('Skills Data load...')
                 data.getSkills($scope.search).$on('loaded', function(data)      {
                     $scope.elements.length  = 0;
                     var list                = data || [];
+                    console.log('... loaded', list.length)
                     var params              = $location.search();
                     for (var i in list)                                         {
                         if ($scope.craftingOnly && (!list[i].recipes || !list[i].recipes.length)) continue;
