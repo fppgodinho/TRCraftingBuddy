@@ -65,7 +65,7 @@ trcraftingbuddy.directive('componentItem', ['elementController', function(elemen
             controller.type         = 'item';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getItem($scope.id + '');
+                var request     = data.getItem($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -85,7 +85,7 @@ trcraftingbuddy.directive('componentIngredientof', ['elementController', functio
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -105,7 +105,7 @@ trcraftingbuddy.directive('componentAgentof', ['elementController', function(ele
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();

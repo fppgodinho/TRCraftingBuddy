@@ -32,29 +32,31 @@ trcraftingbuddy.directive('storeListElement', [function()                       
         controller:     ['$scope', '$location', 'data', function($scope, $location, data) {
             $scope.element      = null;
             $scope.hasBlueprint = null;
-            $scope.$watch('id', function(nv) { loadElement();                       });
+            $scope.$watch('id', function(nv) { loadElement();                   });
 
-            function loadElement()                                                  {
+            function loadElement()                                              {
                 if (!data.loaded || !$scope.type || !$scope.id) return;
                 
                 var request = null;
-                switch($scope.type)                                                 {
-                    case 'skill':       request = data.getSkill($scope.id);     break;
-                    case 'recipe':      request = data.getRecipe($scope.id);    break;
-                    case 'component':   request = data.getComponent($scope.id); break;
-                    case 'filter':      request = data.getFilter($scope.id);    break;
-                    case 'item':        request = data.getItem($scope.id);      break;
-                    case 'specie':      request = data.getSpecie($scope.id);    break;
+                switch($scope.type)                                             {
+                    case 'skill':       request = data.getSkill(+$scope.id);        break;
+                    case 'recipe':      request = data.getRecipe(+$scope.id);       break;
+                    case 'component':   request = data.getComponent(+$scope.id);    break;
+                    case 'filter':      request = data.getFilter(+$scope.id);       break;
+                    case 'item':        request = data.getItem(+$scope.id);         break;
+                    case 'specie':      request = data.getSpecie(+$scope.id);       break;
+                    case 'fitting':     request = data.getFitting(+$scope.id);      break;
+                    case 'structure':   request = data.getStructure(+$scope.id);    break;
                     default: break;
                 }
-                if (request) request.$on('loaded', function(data)                   {
+                if (request) request.$on('loaded', function(data)               {
                     $scope.element          = data || null;
-                    $scope.hasBlueprint     = ($scope.type == 'item' && $scope.element.resultOf && $scope.element.resultOf.length);
+                    $scope.hasBlueprint     = $scope.element.craftable;
                 });
             }
             
             if (data.loaded) loadElement();
-            else data.$on('loaded', function(){ loadElement();                      });
+            else data.$on('loaded', function(){ loadElement();                  });
         }]
     };
 }]);

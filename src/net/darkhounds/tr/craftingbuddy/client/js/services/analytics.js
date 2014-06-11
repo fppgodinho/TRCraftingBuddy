@@ -35,7 +35,7 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
      * @param path The path to register as a page view
      */
     service.register = function(path)                                           {
-        $window.ga('send', 'pageview', path);
+        if ($window.ga) $window.ga('send', 'pageview', path);
     };
 
     /**

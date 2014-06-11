@@ -96,7 +96,7 @@ trcraftingbuddy.directive('itemRecipe', ['elementController', function(elementCo
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -116,7 +116,7 @@ trcraftingbuddy.directive('itemSpecie', ['elementController', function(elementCo
             controller.type         = 'specie';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getSpecie($scope.id + '');
+                var request     = data.getSpecie($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -136,7 +136,7 @@ trcraftingbuddy.directive('itemUsedin', ['elementController', function(elementCo
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -156,7 +156,7 @@ trcraftingbuddy.directive('itemComponent', ['elementController', function(elemen
             controller.type         = 'component';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getComponent($scope.id + '');
+                var request     = data.getComponent($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -176,7 +176,7 @@ trcraftingbuddy.directive('itemFilter', ['elementController', function(elementCo
             controller.type         = 'filter';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getFilter($scope.id + '');
+                var request     = data.getFilter($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();

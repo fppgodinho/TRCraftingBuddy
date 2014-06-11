@@ -53,6 +53,27 @@ trcraftingbuddy.directive('recipes', [function()                                
     };
 }]);
 
+trcraftingbuddy.directive('recipeSkill', ['elementController', function(elementController) {
+    return {
+        scope:          {
+            id: '='
+        },
+        templateUrl:    'html/templates/recipeSkill.html',
+        replace:        true,
+        controller:     ['$scope', 'data', function($scope, data)               {
+            var controller          = elementController.create($scope);
+            controller.type         = 'skill';
+            controller.loadElement  = function()                                {
+                $scope.element  = null; if (!$scope.id) return;
+                var request     = data.getSkill($scope.id);
+                request.$on('loaded', function(data) { $scope.element = data;   });
+            };
+            controller.loadElement();
+        }]
+    }
+}]);
+
+
 trcraftingbuddy.directive('recipeIngredient', ['elementController', function(elementController) {
     return {
         scope:          {
@@ -65,7 +86,7 @@ trcraftingbuddy.directive('recipeIngredient', ['elementController', function(ele
             controller.type         = 'component';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getComponent($scope.id + '');
+                var request     = data.getComponent($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -85,27 +106,7 @@ trcraftingbuddy.directive('recipeAgent', ['elementController', function(elementC
             controller.type         = 'component';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getComponent($scope.id + '');
-                request.$on('loaded', function(data) { $scope.element = data;   });
-            };
-            controller.loadElement();
-        }]
-    }
-}]);
-
-trcraftingbuddy.directive('recipeSkill', ['elementController', function(elementController) {
-    return {
-        scope:          {
-            id: '='
-        },
-        templateUrl:    'html/templates/recipeSkill.html',
-        replace:        true,
-        controller:     ['$scope', 'data', function($scope, data)               {
-            var controller          = elementController.create($scope);
-            controller.type         = 'skill';
-            controller.loadElement  = function()                                {
-                $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getSkill($scope.id + '');
+                var request     = data.getComponent($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -127,16 +128,34 @@ trcraftingbuddy.directive('recipeResult', ['elementController', function(element
 trcraftingbuddy.directive('recipeResultItem', ['elementController', function(elementController) {
     return {
         scope:          {
-            id: '='
+            type:   '=',
+            id:     '='
         },
         templateUrl:    'html/templates/recipeResultItem.html',
         replace:        true,
         controller:     ['$scope', 'data', function($scope, data)               {
+            var types               = {1:'item', 2:'fitting', 3:'structure'};
             var controller          = elementController.create($scope);
-            controller.type         = 'item';
+            controller.type         = types[$scope.type];
+            
+            $scope.$watch('type', function(nv) { controller.type = types[nv]; });
+            
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getItem($scope.id + '');
+
+                var request     = null;
+                switch($scope.type)                                             {
+                    case 3:
+                        request = data.getStructure($scope.id);
+                        break;
+                    case 2:
+                        request = data.getFitting($scope.id);
+                        break;
+                    default:
+                        request = data.getItem($scope.id);
+                        break;
+                }
+                
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -156,7 +175,7 @@ trcraftingbuddy.directive('recipeResultFilter', ['elementController', function(e
             controller.type         = 'filter';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getFilter($scope.id + '');
+                var request     = data.getFilter($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();

@@ -7,6 +7,8 @@
         <button data-ng-click="type='component'"    data-ng-disabled="type=='component'">Component</button>
         <button data-ng-click="type='filter'"       data-ng-disabled="type=='filter'">Filter</button>
         <button data-ng-click="type='specie'"       data-ng-disabled="type=='specie'">Specie</button>
+        <button data-ng-click="type='fitting'"      data-ng-disabled="type=='fitting'">Fitting</button>
+        <button data-ng-click="type='structure'"    data-ng-disabled="type=='structure'">Structure</button>
     </div>
     
     <div data-blueprints    data-ng-show="type=='blueprint'"></div>
@@ -16,6 +18,8 @@
     <div data-components    data-ng-show="type=='component'"></div>
     <div data-filters       data-ng-show="type=='filter'"></div>
     <div data-species       data-ng-show="type=='specie'"></div>
+    <div data-fittings      data-ng-show="type=='fitting'"></div>
+    <div data-structures    data-ng-show="type=='structure'"></div>
     <div data-store-list></div>
     
 </div>

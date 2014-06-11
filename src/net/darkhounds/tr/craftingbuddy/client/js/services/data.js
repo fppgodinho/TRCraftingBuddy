@@ -20,13 +20,19 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
     service.getItems        = function(filter) { return getFilteredByName(db, 'items',      filter); };
     service.getItem         = function(id) { return getByKey(db, 'items',       id); };
     //
+    service.getFittings     = function(filter) { return getFilteredByName(db, 'fittings',      filter); };
+    service.getFitting      = function(id) { return getByKey(db, 'fittings',    id); };
+    //
+    service.getStructures   = function(filter) { return getFilteredByName(db, 'structures',      filter); };
+    service.getStructure    = function(id) { return getByKey(db, 'structures',  id); };
+    //
     service.getSpecies      = function(filter) { return getFilteredByName(db, 'species',    filter); };
     service.getSpecie       = function(id) { return getByKey(db, 'species',     id); };
     //
     service.getBlueprints   = function(filter)  { return getFilteredByName(db, 'blueprints', filter); };
     service.getBlueprint    = function(id) { return getByKey(db, 'blueprints',  id); };
-    service.saveBlueprint   = function(data) { return saveData(db, 'blueprints',  data);};
-    service.removeBlueprint = function(id) { return removeByKey(db, 'blueprints',  id);};
+    service.saveBlueprint   = function(data) { return saveData(db, 'blueprints',    data);};
+    service.removeBlueprint = function(id) { return removeByKey(db, 'blueprints',   id);};
     //
     var db                  = null;
     //
@@ -39,7 +45,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         species:    false
     };
     //
-    var request             = window.indexedDB.open("gameDB", 1);
+    var request             = window.indexedDB.open("gameDB", 2);
     request.onerror         = function(event)                                   {
         // browser access to indexDB denied by the user
         console.log('DB connection failed');
@@ -53,6 +59,8 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         intializeStore(DBSchema, 'components');
         intializeStore(DBSchema, 'filters');
         intializeStore(DBSchema, 'items');
+        intializeStore(DBSchema, 'fittings');
+        intializeStore(DBSchema, 'structures');
         intializeStore(DBSchema, 'species');
         intializeStore(DBSchema, 'blueprints', true);
     };
@@ -67,11 +75,17 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         loadStore(db, 'components', 'data/components.json');
         loadStore(db, 'filters',    'data/filters.json');
         loadStore(db, 'items',      'data/items.json');
+        loadStore(db, 'fittings',   'data/fittings.json');
+        loadStore(db, 'structures', 'data/structures.json');
         loadStore(db, 'species',    'data/species.json');
     };
     //
     function intializeStore(DBSchema, name, src, auto)                          {
-        var schema                      = DBSchema.createObjectStore(name, { keyPath: "id", autoIncrement: true });
+        if (DBSchema.objectStoreNames.contains(name))                           {
+            DBSchema.deleteObjectStore(name);
+        }
+        
+        var schema      = DBSchema.createObjectStore(name, { keyPath: "id", autoIncrement: true });
         schema.createIndex("name", "name", { unique: false });
         return schema.transaction;
     }
@@ -148,6 +162,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         };
         request.onsuccess   = function(e)                                       {
             response.data   = request.result;
+            if (!request.result) console.log('LOAD ERROR: ', name, key);
             response.$broadcast('loaded', response.data);
         };
         //

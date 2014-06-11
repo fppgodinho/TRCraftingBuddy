@@ -15,8 +15,8 @@
             <div class="field">Ingredients: {{selected.ingredients.length}}</div>
             <div class="list">
                 <div>
-                    <div data-ng-repeat="id in selected.ingredients">
-                        <div class="field" data-recipe-ingredient data-id="id"></div>
+                    <div data-ng-repeat="ingredient in selected.ingredients">
+                        <div class="field" data-recipe-ingredient data-id="ingredient.id"></div>
                     </div>
                 </div>
             </div>
@@ -25,8 +25,8 @@
             <div class="field">Agents: {{selected.agents.length}}</div>
             <div class="list">
                 <div>
-                    <div data-ng-repeat="id in selected.agents">
-                        <div class="field" data-recipe-agent data-id="id"></div>
+                    <div data-ng-repeat="agent in selected.agents">
+                        <div class="field" data-recipe-agent data-id="agent.id"></div>
                     </div>
                 </div>
             </div>

@@ -4,18 +4,20 @@ trcraftingbuddy.directive('blueprints', [function()                             
         replace:        true,
         templateUrl:    'html/templates/blueprints.html',
         controller:     ['$scope', 'data', 'store', 'blueprint', '$location', function($scope, data, store, blueprint, $location) {
+            $scope.type         = $location.search().btype || 'item';
             $scope.itemID       = $location.search().blueprint;
             $scope.blueprint    = null;
             
             function parseLocation()                                            {
                 var params      = $location.search();
                 $scope.itemID   = params.blueprint || $scope.itemID;
+                $scope.type     = params.btype || $scope.type || 'item';
             }
             $scope.$on('$locationChangeStart', function (nv) { parseLocation(); });
             
             $scope.$watch('itemID', function (nv)                               {
                 if (!nv) return;
-                $scope.blueprint    = blueprint.initialize(nv);
+                $scope.blueprint    = blueprint.initialize($scope.type, nv);
                 var params          = $location.search();
                 params.blueprint    = nv || '';
                 $location.search(params);
@@ -75,6 +77,7 @@ trcraftingbuddy.directive('blueprintsSaves', ['data', 'blueprint', function(data
 trcraftingbuddy.directive('blueprintsItems', ['data', 'store', function(data, store) {
     return {
         scope:          {
+            type:       '=',
             id:         '='
         },
         replace:        true,
@@ -99,7 +102,11 @@ trcraftingbuddy.directive('blueprintsItems', ['data', 'store', function(data, st
             //
             $scope.$watch('selected', function (nv)                             {
                 if (!nv) return;
-                $scope.id   = nv.id;
+                //
+                if (nv.id)                                                      {
+                    $scope.id   = nv.id;
+                    $scope.type = 'item';
+                }
             });
             //
             function checkSelected()                                            {
@@ -157,19 +164,30 @@ trcraftingbuddy.directive('blueprintsItem', ['blueprintController', function(blu
                 controller.clearLoadEvents();
                 $scope.item             = null;
                 $scope.recipe           = null;
-                if ($scope.element && $scope.element.id) controller.addLoadEventRemover(
-                    controller.data.getItem($scope.element.id).$on('loaded', function (dataItem) {
-                        $scope.item             = dataItem;
-                        $scope.recipes.length   = 0;
-                        $scope.recipes.push({name: '-'});
-                        $scope.recipe           = $scope.recipes[0];
-                        for (var i in dataItem.resultOf) controller.addLoadEventRemover(
-                            controller.data.getRecipe(dataItem.resultOf[i] + '').$on('loaded', function(dataRecipe){
-                                $scope.recipes.push(dataRecipe);
-                            })
-                        );
-                    })
-                );
+                
+                var request = null;
+                
+                if ($scope.element && $scope.element.id)                        {
+                    switch($scope.element.type)                                 {
+                        case 'structure':   request = controller.data.getStructure(+$scope.element.id); break;
+                        case 'fitting':     request = controller.data.getFitting(+$scope.element.id);   break;
+                        default:            request = controller.data.getItem(+$scope.element.id);      break;
+                    }
+                    
+                    controller.addLoadEventRemover(
+                        request.$on('loaded', function (dataItem) {
+                            $scope.item             = dataItem;
+                            $scope.recipes.length   = 0;
+                            $scope.recipes.push({name: '-'});
+                            $scope.recipe           = $scope.recipes[0];
+                            for (var i in dataItem.resultOf) controller.addLoadEventRemover(
+                                controller.data.getRecipe(+dataItem.resultOf[i]).$on('loaded', function(dataRecipe){
+                                    $scope.recipes.push(dataRecipe);
+                                })
+                            );
+                        })
+                    );
+                }
             }
         }]
     }
@@ -203,7 +221,7 @@ trcraftingbuddy.directive('blueprintsRecipe', ['blueprintController', function(b
                 $scope.recipe           = null;
                 //
                 if ($scope.element && $scope.element.id) controller.addLoadEventRemover(
-                    controller.data.getRecipe($scope.element.id).$on('loaded', function (dataRecipe) {
+                    controller.data.getRecipe(+$scope.element.id).$on('loaded', function (dataRecipe) {
                         $scope.recipe               = dataRecipe;
                         $scope.result               = null;
                         $scope.ingredients.length   = 0;
@@ -223,14 +241,14 @@ trcraftingbuddy.directive('blueprintsRecipe', ['blueprintController', function(b
             }
             function getIngredient(id, filters)                                 {
                 controller.addLoadEventRemover(
-                    controller.data.getComponent($scope.recipe.ingredients[id] + '').$on('loaded', function(dataComponent){
+                    controller.data.getComponent(+$scope.recipe.ingredients[id].id).$on('loaded', function(dataComponent){
                         $scope.ingredients.push({blueprint: $scope.element, component: dataComponent, filter: filters[id], pos: id});
                     })
                 );
             }
             function getAgent(id)                                               {
                 controller.addLoadEventRemover(
-                    controller.data.getComponent($scope.recipe.agents[id] + '').$on('loaded', function(dataComponent){
+                    controller.data.getComponent(+$scope.recipe.agents[id].id).$on('loaded', function(dataComponent){
                         $scope.agents.push({blueprint: $scope.element, component: dataComponent, pos: id});
                     })
                 );
@@ -259,7 +277,7 @@ trcraftingbuddy.directive('blueprintsRecipeSkill', ['blueprintController', funct
                 controller.clearLoadEvents();
                 $scope.skill = null;
                 if ($scope.id) controller.addLoadEventRemover(
-                    controller.data.getSkill($scope.id).$on('loaded', function (dataSkill) {
+                    controller.data.getSkill(+$scope.id).$on('loaded', function (dataSkill) {
                         $scope.skill   = dataSkill;
                     })
                 );
@@ -288,7 +306,7 @@ trcraftingbuddy.directive('blueprintsRecipeIngredient', ['blueprintController', 
             }));
             controller.addEventRemover($scope.$watch('item', function(nv)       {
                 if (!$scope.ingredient) return;
-                $scope.blueprint = nv?$scope.ingredient.blueprint.addIngredient($scope.ingredient.pos, $scope.item.id, $scope.filter?$scope.filter.id:null):null;
+                $scope.blueprint = nv?$scope.ingredient.blueprint.addIngredient($scope.ingredient.pos, 'item', $scope.item.id, $scope.filter?$scope.filter.id:null):null;
             }));
             //
             controller.getData = function()                                     {
@@ -300,7 +318,7 @@ trcraftingbuddy.directive('blueprintsRecipeIngredient', ['blueprintController', 
                 $scope.item         = null;
                 //
                 if ($scope.ingredient && $scope.ingredient.filter) controller.addLoadEventRemover(
-                    controller.data.getFilter($scope.ingredient.filter + '').$on('loaded', function (dataFilter) {
+                    controller.data.getFilter(+$scope.ingredient.filter).$on('loaded', function (dataFilter) {
                         $scope.filter   = dataFilter;
                         getItems();
                     })
@@ -315,7 +333,7 @@ trcraftingbuddy.directive('blueprintsRecipeIngredient', ['blueprintController', 
                 var items   = $scope.filter?$scope.filter.items:$scope.component.items;
                 
                 for (var i in items) controller.addLoadEventRemover(
-                    controller.data.getItem(items[i] + '').$on('loaded', function(dataItem){
+                    controller.data.getItem(+items[i]).$on('loaded', function(dataItem){
                         $scope.items.push(dataItem);
                     })
                 );
@@ -343,7 +361,7 @@ trcraftingbuddy.directive('blueprintsRecipeAgent', ['blueprintController', funct
             }));
             controller.addEventRemover($scope.$watch('item', function(nv)       {
                 if (!$scope.agent) return;
-                $scope.blueprint = nv?$scope.agent.blueprint.addAgent($scope.agent.pos, $scope.item.id):null;
+                $scope.blueprint = nv?$scope.agent.blueprint.addAgent($scope.agent.pos, 'item', $scope.item.id):null;
             }));
             //
             controller.getData = function()                                     {
@@ -357,7 +375,7 @@ trcraftingbuddy.directive('blueprintsRecipeAgent', ['blueprintController', funct
                     $scope.item = $scope.items[0];
                     var items   = $scope.component.items;
                     for (var i in items) controller.addLoadEventRemover(
-                        controller.data.getItem(items[i] + '').$on('loaded', function(dataItem){
+                        controller.data.getItem(+items[i]).$on('loaded', function(dataItem){
                             $scope.items.push(dataItem);
                         })
                     );

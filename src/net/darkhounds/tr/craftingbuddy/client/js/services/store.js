@@ -27,6 +27,7 @@ trcraftingbuddy.service('store', ['observable', '$rootScope', '$location', funct
         element.blueprint       = function ()                                   {
             var params          = $location.search();
             params.type         = 'blueprint';
+            params.btype        = type;
             params.blueprint    = id;
             $location.search(params);
         };

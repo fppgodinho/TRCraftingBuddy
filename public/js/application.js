@@ -9,18 +9,20 @@ trcraftingbuddy.directive('blueprints', [function()                             
         replace:        true,
         templateUrl:    'html/templates/blueprints.html',
         controller:     ['$scope', 'data', 'store', 'blueprint', '$location', function($scope, data, store, blueprint, $location) {
+            $scope.type         = $location.search().btype || 'item';
             $scope.itemID       = $location.search().blueprint;
             $scope.blueprint    = null;
             
             function parseLocation()                                            {
                 var params      = $location.search();
                 $scope.itemID   = params.blueprint || $scope.itemID;
+                $scope.type     = params.btype || $scope.type || 'item';
             }
             $scope.$on('$locationChangeStart', function (nv) { parseLocation(); });
             
             $scope.$watch('itemID', function (nv)                               {
                 if (!nv) return;
-                $scope.blueprint    = blueprint.initialize(nv);
+                $scope.blueprint    = blueprint.initialize($scope.type, nv);
                 var params          = $location.search();
                 params.blueprint    = nv || '';
                 $location.search(params);
@@ -80,6 +82,7 @@ trcraftingbuddy.directive('blueprintsSaves', ['data', 'blueprint', function(data
 trcraftingbuddy.directive('blueprintsItems', ['data', 'store', function(data, store) {
     return {
         scope:          {
+            type:       '=',
             id:         '='
         },
         replace:        true,
@@ -104,7 +107,11 @@ trcraftingbuddy.directive('blueprintsItems', ['data', 'store', function(data, st
             //
             $scope.$watch('selected', function (nv)                             {
                 if (!nv) return;
-                $scope.id   = nv.id;
+                //
+                if (nv.id)                                                      {
+                    $scope.id   = nv.id;
+                    $scope.type = 'item';
+                }
             });
             //
             function checkSelected()                                            {
@@ -162,19 +169,30 @@ trcraftingbuddy.directive('blueprintsItem', ['blueprintController', function(blu
                 controller.clearLoadEvents();
                 $scope.item             = null;
                 $scope.recipe           = null;
-                if ($scope.element && $scope.element.id) controller.addLoadEventRemover(
-                    controller.data.getItem($scope.element.id).$on('loaded', function (dataItem) {
-                        $scope.item             = dataItem;
-                        $scope.recipes.length   = 0;
-                        $scope.recipes.push({name: '-'});
-                        $scope.recipe           = $scope.recipes[0];
-                        for (var i in dataItem.resultOf) controller.addLoadEventRemover(
-                            controller.data.getRecipe(dataItem.resultOf[i] + '').$on('loaded', function(dataRecipe){
-                                $scope.recipes.push(dataRecipe);
-                            })
-                        );
-                    })
-                );
+                
+                var request = null;
+                
+                if ($scope.element && $scope.element.id)                        {
+                    switch($scope.element.type)                                 {
+                        case 'structure':   request = controller.data.getStructure(+$scope.element.id); break;
+                        case 'fitting':     request = controller.data.getFitting(+$scope.element.id);   break;
+                        default:            request = controller.data.getItem(+$scope.element.id);      break;
+                    }
+                    
+                    controller.addLoadEventRemover(
+                        request.$on('loaded', function (dataItem) {
+                            $scope.item             = dataItem;
+                            $scope.recipes.length   = 0;
+                            $scope.recipes.push({name: '-'});
+                            $scope.recipe           = $scope.recipes[0];
+                            for (var i in dataItem.resultOf) controller.addLoadEventRemover(
+                                controller.data.getRecipe(+dataItem.resultOf[i]).$on('loaded', function(dataRecipe){
+                                    $scope.recipes.push(dataRecipe);
+                                })
+                            );
+                        })
+                    );
+                }
             }
         }]
     }
@@ -208,7 +226,7 @@ trcraftingbuddy.directive('blueprintsRecipe', ['blueprintController', function(b
                 $scope.recipe           = null;
                 //
                 if ($scope.element && $scope.element.id) controller.addLoadEventRemover(
-                    controller.data.getRecipe($scope.element.id).$on('loaded', function (dataRecipe) {
+                    controller.data.getRecipe(+$scope.element.id).$on('loaded', function (dataRecipe) {
                         $scope.recipe               = dataRecipe;
                         $scope.result               = null;
                         $scope.ingredients.length   = 0;
@@ -228,14 +246,14 @@ trcraftingbuddy.directive('blueprintsRecipe', ['blueprintController', function(b
             }
             function getIngredient(id, filters)                                 {
                 controller.addLoadEventRemover(
-                    controller.data.getComponent($scope.recipe.ingredients[id] + '').$on('loaded', function(dataComponent){
+                    controller.data.getComponent(+$scope.recipe.ingredients[id].id).$on('loaded', function(dataComponent){
                         $scope.ingredients.push({blueprint: $scope.element, component: dataComponent, filter: filters[id], pos: id});
                     })
                 );
             }
             function getAgent(id)                                               {
                 controller.addLoadEventRemover(
-                    controller.data.getComponent($scope.recipe.agents[id] + '').$on('loaded', function(dataComponent){
+                    controller.data.getComponent(+$scope.recipe.agents[id].id).$on('loaded', function(dataComponent){
                         $scope.agents.push({blueprint: $scope.element, component: dataComponent, pos: id});
                     })
                 );
@@ -264,7 +282,7 @@ trcraftingbuddy.directive('blueprintsRecipeSkill', ['blueprintController', funct
                 controller.clearLoadEvents();
                 $scope.skill = null;
                 if ($scope.id) controller.addLoadEventRemover(
-                    controller.data.getSkill($scope.id).$on('loaded', function (dataSkill) {
+                    controller.data.getSkill(+$scope.id).$on('loaded', function (dataSkill) {
                         $scope.skill   = dataSkill;
                     })
                 );
@@ -293,7 +311,7 @@ trcraftingbuddy.directive('blueprintsRecipeIngredient', ['blueprintController', 
             }));
             controller.addEventRemover($scope.$watch('item', function(nv)       {
                 if (!$scope.ingredient) return;
-                $scope.blueprint = nv?$scope.ingredient.blueprint.addIngredient($scope.ingredient.pos, $scope.item.id, $scope.filter?$scope.filter.id:null):null;
+                $scope.blueprint = nv?$scope.ingredient.blueprint.addIngredient($scope.ingredient.pos, 'item', $scope.item.id, $scope.filter?$scope.filter.id:null):null;
             }));
             //
             controller.getData = function()                                     {
@@ -305,7 +323,7 @@ trcraftingbuddy.directive('blueprintsRecipeIngredient', ['blueprintController', 
                 $scope.item         = null;
                 //
                 if ($scope.ingredient && $scope.ingredient.filter) controller.addLoadEventRemover(
-                    controller.data.getFilter($scope.ingredient.filter + '').$on('loaded', function (dataFilter) {
+                    controller.data.getFilter(+$scope.ingredient.filter).$on('loaded', function (dataFilter) {
                         $scope.filter   = dataFilter;
                         getItems();
                     })
@@ -320,7 +338,7 @@ trcraftingbuddy.directive('blueprintsRecipeIngredient', ['blueprintController', 
                 var items   = $scope.filter?$scope.filter.items:$scope.component.items;
                 
                 for (var i in items) controller.addLoadEventRemover(
-                    controller.data.getItem(items[i] + '').$on('loaded', function(dataItem){
+                    controller.data.getItem(+items[i]).$on('loaded', function(dataItem){
                         $scope.items.push(dataItem);
                     })
                 );
@@ -348,7 +366,7 @@ trcraftingbuddy.directive('blueprintsRecipeAgent', ['blueprintController', funct
             }));
             controller.addEventRemover($scope.$watch('item', function(nv)       {
                 if (!$scope.agent) return;
-                $scope.blueprint = nv?$scope.agent.blueprint.addAgent($scope.agent.pos, $scope.item.id):null;
+                $scope.blueprint = nv?$scope.agent.blueprint.addAgent($scope.agent.pos, 'item', $scope.item.id):null;
             }));
             //
             controller.getData = function()                                     {
@@ -362,7 +380,7 @@ trcraftingbuddy.directive('blueprintsRecipeAgent', ['blueprintController', funct
                     $scope.item = $scope.items[0];
                     var items   = $scope.component.items;
                     for (var i in items) controller.addLoadEventRemover(
-                        controller.data.getItem(items[i] + '').$on('loaded', function(dataItem){
+                        controller.data.getItem(+items[i]).$on('loaded', function(dataItem){
                             $scope.items.push(dataItem);
                         })
                     );
@@ -439,7 +457,7 @@ trcraftingbuddy.directive('componentItem', ['elementController', function(elemen
             controller.type         = 'item';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getItem($scope.id + '');
+                var request     = data.getItem($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -459,7 +477,7 @@ trcraftingbuddy.directive('componentIngredientof', ['elementController', functio
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -479,7 +497,7 @@ trcraftingbuddy.directive('componentAgentof', ['elementController', function(ele
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -554,7 +572,7 @@ trcraftingbuddy.directive('filterRecipe', ['elementController', function(element
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -574,7 +592,92 @@ trcraftingbuddy.directive('filterItem', ['elementController', function(elementCo
             controller.type         = 'item';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getItem($scope.id + '');
+                var request     = data.getItem($scope.id);
+                request.$on('loaded', function(data) { $scope.element = data;   });
+            };
+            controller.loadElement();
+        }]
+    }
+}]);
+
+trcraftingbuddy.directive('fittings', [function()                                  {
+    return {
+        scope:          {},
+        replace:        true,
+        templateUrl:    'html/templates/fittings.html',
+        controller:     ['$scope', 'data', 'store', '$location', function($scope, data, store, $location) {
+            var type            = 'fitting';
+            $scope.selected     = false;
+            $scope.elements     = [];
+            $scope.crafted      = false;
+            $scope.search       = '';
+            $scope.store        = function()                                    {
+                if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
+            };
+            //
+            $scope.$on('$locationChangeStart', function(nv)                     {
+                var params      = $location.search();
+                for (var i in $scope.elements)
+                    if ($scope.elements[i].id == params[type])
+                        $scope.selected = $scope.elements[i];
+            });
+            //
+            $scope.$watch('selected', function(nv)                              {
+                var params  = $location.search();
+                if (!$scope.selected) return;
+                params[type]    = $scope.selected.id
+                $location.search(params);
+            });
+            //
+            $scope.$watch('crafted', function(nv)                               {
+                if (!data.loaded) return;
+                if (nv) $scope.other    = false;
+                var params      = $location.search();
+                getData();
+            });
+            //
+            $scope.$watch('search', function(nv)                                {
+                if (!data.loaded) return;
+                getData();
+            });
+            //
+            function loadData()                                                 {
+                data.$on('loaded', getData );
+            }
+            //
+            function getData()                                                  {
+                data.getFittings($scope.search).$on('loaded', function(data)    {
+                    $scope.elements.length  = 0;
+                    var list                = data || [];
+                    var params              = $location.search();
+                    for (var i in list)                                         {
+                        if ($scope.crafted && (!list[i].craftable)) continue;
+                        
+                        $scope.elements.push(list[i]);
+                        if ((($scope.search || !params[type]) && $scope.elements.length == 1) || (params.type == type && params[type] == list[i].id))
+                            $scope.selected = list[i];
+                    }
+                });
+            }
+            //
+            if (!data.loaded) loadData(); else getData();
+        }]
+    };
+}]);
+
+trcraftingbuddy.directive('fittingRecipe', ['elementController', function(elementController) {
+    return {
+        scope:          {
+            id: '='
+        },
+        templateUrl:    'html/templates/fittingRecipe.html',
+        replace:        true,
+        controller:     ['$scope', 'data', function($scope, data)               {
+            var controller          = elementController.create($scope);
+            controller.type         = 'recipe';
+            controller.loadElement  = function()                                {
+                $scope.element  = null; if (!$scope.id) return;
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -680,7 +783,7 @@ trcraftingbuddy.directive('itemRecipe', ['elementController', function(elementCo
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -700,7 +803,7 @@ trcraftingbuddy.directive('itemSpecie', ['elementController', function(elementCo
             controller.type         = 'specie';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getSpecie($scope.id + '');
+                var request     = data.getSpecie($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -720,7 +823,7 @@ trcraftingbuddy.directive('itemUsedin', ['elementController', function(elementCo
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -740,7 +843,7 @@ trcraftingbuddy.directive('itemComponent', ['elementController', function(elemen
             controller.type         = 'component';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getComponent($scope.id + '');
+                var request     = data.getComponent($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -760,7 +863,7 @@ trcraftingbuddy.directive('itemFilter', ['elementController', function(elementCo
             controller.type         = 'filter';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getFilter($scope.id + '');
+                var request     = data.getFilter($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -823,6 +926,27 @@ trcraftingbuddy.directive('recipes', [function()                                
     };
 }]);
 
+trcraftingbuddy.directive('recipeSkill', ['elementController', function(elementController) {
+    return {
+        scope:          {
+            id: '='
+        },
+        templateUrl:    'html/templates/recipeSkill.html',
+        replace:        true,
+        controller:     ['$scope', 'data', function($scope, data)               {
+            var controller          = elementController.create($scope);
+            controller.type         = 'skill';
+            controller.loadElement  = function()                                {
+                $scope.element  = null; if (!$scope.id) return;
+                var request     = data.getSkill($scope.id);
+                request.$on('loaded', function(data) { $scope.element = data;   });
+            };
+            controller.loadElement();
+        }]
+    }
+}]);
+
+
 trcraftingbuddy.directive('recipeIngredient', ['elementController', function(elementController) {
     return {
         scope:          {
@@ -835,7 +959,7 @@ trcraftingbuddy.directive('recipeIngredient', ['elementController', function(ele
             controller.type         = 'component';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getComponent($scope.id + '');
+                var request     = data.getComponent($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -855,27 +979,7 @@ trcraftingbuddy.directive('recipeAgent', ['elementController', function(elementC
             controller.type         = 'component';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getComponent($scope.id + '');
-                request.$on('loaded', function(data) { $scope.element = data;   });
-            };
-            controller.loadElement();
-        }]
-    }
-}]);
-
-trcraftingbuddy.directive('recipeSkill', ['elementController', function(elementController) {
-    return {
-        scope:          {
-            id: '='
-        },
-        templateUrl:    'html/templates/recipeSkill.html',
-        replace:        true,
-        controller:     ['$scope', 'data', function($scope, data)               {
-            var controller          = elementController.create($scope);
-            controller.type         = 'skill';
-            controller.loadElement  = function()                                {
-                $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getSkill($scope.id + '');
+                var request     = data.getComponent($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -897,16 +1001,34 @@ trcraftingbuddy.directive('recipeResult', ['elementController', function(element
 trcraftingbuddy.directive('recipeResultItem', ['elementController', function(elementController) {
     return {
         scope:          {
-            id: '='
+            type:   '=',
+            id:     '='
         },
         templateUrl:    'html/templates/recipeResultItem.html',
         replace:        true,
         controller:     ['$scope', 'data', function($scope, data)               {
+            var types               = {1:'item', 2:'fitting', 3:'structure'};
             var controller          = elementController.create($scope);
-            controller.type         = 'item';
+            controller.type         = types[$scope.type];
+            
+            $scope.$watch('type', function(nv) { controller.type = types[nv]; });
+            
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getItem($scope.id + '');
+
+                var request     = null;
+                switch($scope.type)                                             {
+                    case 3:
+                        request = data.getStructure($scope.id);
+                        break;
+                    case 2:
+                        request = data.getFitting($scope.id);
+                        break;
+                    default:
+                        request = data.getItem($scope.id);
+                        break;
+                }
+                
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -926,7 +1048,7 @@ trcraftingbuddy.directive('recipeResultFilter', ['elementController', function(e
             controller.type         = 'filter';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getFilter($scope.id + '');
+                var request     = data.getFilter($scope.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -1027,7 +1149,7 @@ trcraftingbuddy.directive('skillRecipe', ['elementController', function(elementC
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data)                            {
                     $scope.element = data;
                 });
@@ -1113,7 +1235,7 @@ trcraftingbuddy.directive('specieItem', ['elementController', function(elementCo
             controller.type         = 'item';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.item) return;
-                var request     = data.getItem($scope.item.id + '');
+                var request     = data.getItem($scope.item.id);
                 request.$on('loaded', function(data) { $scope.element = data;   });
             };
             controller.loadElement();
@@ -1156,32 +1278,119 @@ trcraftingbuddy.directive('storeListElement', [function()                       
         controller:     ['$scope', '$location', 'data', function($scope, $location, data) {
             $scope.element      = null;
             $scope.hasBlueprint = null;
-            $scope.$watch('id', function(nv) { loadElement();                       });
+            $scope.$watch('id', function(nv) { loadElement();                   });
 
-            function loadElement()                                                  {
+            function loadElement()                                              {
                 if (!data.loaded || !$scope.type || !$scope.id) return;
                 
                 var request = null;
-                switch($scope.type)                                                 {
-                    case 'skill':       request = data.getSkill($scope.id);     break;
-                    case 'recipe':      request = data.getRecipe($scope.id);    break;
-                    case 'component':   request = data.getComponent($scope.id); break;
-                    case 'filter':      request = data.getFilter($scope.id);    break;
-                    case 'item':        request = data.getItem($scope.id);      break;
-                    case 'specie':      request = data.getSpecie($scope.id);    break;
+                switch($scope.type)                                             {
+                    case 'skill':       request = data.getSkill(+$scope.id);        break;
+                    case 'recipe':      request = data.getRecipe(+$scope.id);       break;
+                    case 'component':   request = data.getComponent(+$scope.id);    break;
+                    case 'filter':      request = data.getFilter(+$scope.id);       break;
+                    case 'item':        request = data.getItem(+$scope.id);         break;
+                    case 'specie':      request = data.getSpecie(+$scope.id);       break;
+                    case 'fitting':     request = data.getFitting(+$scope.id);      break;
+                    case 'structure':   request = data.getStructure(+$scope.id);    break;
                     default: break;
                 }
-                if (request) request.$on('loaded', function(data)                   {
+                if (request) request.$on('loaded', function(data)               {
                     $scope.element          = data || null;
-                    $scope.hasBlueprint     = ($scope.type == 'item' && $scope.element.resultOf && $scope.element.resultOf.length);
+                    $scope.hasBlueprint     = $scope.element.craftable;
                 });
             }
             
             if (data.loaded) loadElement();
-            else data.$on('loaded', function(){ loadElement();                      });
+            else data.$on('loaded', function(){ loadElement();                  });
         }]
     };
 }]);
+trcraftingbuddy.directive('structures', [function()                             {
+    return {
+        scope:          {},
+        replace:        true,
+        templateUrl:    'html/templates/structures.html',
+        controller:     ['$scope', 'data', 'store', '$location', function($scope, data, store, $location) {
+            var type            = 'structure';
+            $scope.selected     = false;
+            $scope.elements     = [];
+            $scope.crafted      = false;
+            $scope.search       = '';
+            $scope.store        = function()                                    {
+                if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
+            };
+            //
+            $scope.$on('$locationChangeStart', function(nv)                     {
+                var params      = $location.search();
+                for (var i in $scope.elements)
+                    if ($scope.elements[i].id == params[type])
+                        $scope.selected = $scope.elements[i];
+            });
+            //
+            $scope.$watch('selected', function(nv)                              {
+                var params  = $location.search();
+                if (!$scope.selected) return;
+                params[type]    = $scope.selected.id
+                $location.search(params);
+            });
+            //
+            $scope.$watch('crafted', function(nv)                               {
+                if (!data.loaded) return;
+                if (nv) $scope.other    = false;
+                var params      = $location.search();
+                getData();
+            });
+            //
+            $scope.$watch('search', function(nv)                                {
+                if (!data.loaded) return;
+                getData();
+            });
+            //
+            function loadData()                                                 {
+                data.$on('loaded', getData );
+            }
+            //
+            function getData()                                                  {
+                data.getStructures($scope.search).$on('loaded', function(data)  {
+                    $scope.elements.length  = 0;
+                    var list                = data || [];
+                    var params              = $location.search();
+                    for (var i in list)                                         {
+                        if ($scope.crafted && (!list[i].craftable)) continue;
+                        
+                        $scope.elements.push(list[i]);
+                        if ((($scope.search || !params[type]) && $scope.elements.length == 1) || (params.type == type && params[type] == list[i].id))
+                            $scope.selected = list[i];
+                    }
+                });
+            }
+            //
+            if (!data.loaded) loadData(); else getData();
+        }]
+    };
+}]);
+
+trcraftingbuddy.directive('structureRecipe', ['elementController', function(elementController) {
+    return {
+        scope:          {
+            id: '='
+        },
+        templateUrl:    'html/templates/structureRecipe.html',
+        replace:        true,
+        controller:     ['$scope', 'data', function($scope, data)               {
+            var controller          = elementController.create($scope);
+            controller.type         = 'recipe';
+            controller.loadElement  = function()                                {
+                $scope.element  = null; if (!$scope.id) return;
+                var request     = data.getRecipe($scope.id);
+                request.$on('loaded', function(data) { $scope.element = data;   });
+            };
+            controller.loadElement();
+        }]
+    }
+}]);
+
 trcraftingbuddy.directive('viewport', [function()                               {
     return {
         replace:        true,
@@ -1191,13 +1400,15 @@ trcraftingbuddy.directive('viewport', [function()                               
             $scope.type         = $location.search().type || 'skill';
             
             analytics.auto = true;
-            analytics.initialize('UA-51275210-2', 'darkhounds.net');
+            // analytics.initialize('UA-51275210-2', 'darkhounds.net');
             
             $scope.$watch('type', function(nv)                                  {
                 switch (nv.toLowerCase())                                       {
                     case 'recipe':      $scope.type = 'recipe';     break;
                     case 'component':   $scope.type = 'component';  break;
                     case 'filter':      $scope.type = 'filter';     break;
+                    case 'fitting':     $scope.type = 'fitting';    break;
+                    case 'structure':   $scope.type = 'structure';  break;
                     case 'item':        $scope.type = 'item';       break;
                     case 'specie':      $scope.type = 'specie';     break;
                     case 'blueprint':   $scope.type = 'blueprint';  break;
@@ -1454,7 +1665,7 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
      * @param path The path to register as a page view
      */
     service.register = function(path)                                           {
-        $window.ga('send', 'pageview', path);
+        if ($window.ga) $window.ga('send', 'pageview', path);
     };
 
     /**
@@ -1472,9 +1683,9 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', 'analytics', '$rootS
     //
     var service             = observable.create({});
     var blueprint           = {};
-    service.initialize      = function(id)                                      {
-        if (id) analytics.register('blueprint/initialize/' + id);
-        blueprint       = {id: id, parent: null};
+    service.initialize      = function(type, id)                                {
+        if (id) analytics.register('blueprint/initialize/' + type + '/' + id);
+        blueprint       = {type: type, id: id, parent: null};
         Object.defineProperty(blueprint, 'addRecipe',                           {
             enumerable:     false,
             configurable:   false,
@@ -1493,22 +1704,22 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', 'analytics', '$rootS
             enumerable:     false,
             configurable:   false,
             writable:       false,
-            value:          function(pos, id, filter){ return addIngredient(recipe, pos, id, filter);  }
+            value:          function(pos, type, id, filter){ return addIngredient(recipe, pos, type, id, filter);  }
         });
         Object.defineProperty(recipe, 'addAgent',                               {
             enumerable:     false,
             configurable:   false,
             writable:       false,
-            value:          function(pos, id) { return addAgent(recipe, pos, id); }
+            value:          function(pos, type, id) { return addAgent(recipe, pos, type, id); }
         });
         parent.recipe   = recipe;
         //
         return recipe;
     };
     
-    function addIngredient(parent, pos, id, filter)                             {
-        if (id) analytics.register('blueprint/ingredient/' + id + '/pos/' + pos + '/filter/' + filter);
-        var ingredient = {id: id, parent: parent, filter: filter};
+    function addIngredient(parent, pos, type, id, filter)                             {
+        if (id) analytics.register('blueprint/ingredient/' + type + '/' + id + '/pos/' + pos + '/filter/' + filter);
+        var ingredient = {type: type, id: id, parent: parent, filter: filter};
         //
         Object.defineProperty(ingredient, 'addRecipe',                          {
             enumerable:     false,
@@ -1522,9 +1733,9 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', 'analytics', '$rootS
         
     }
     
-    function addAgent(parent, pos, id)                                          {
-        if (id) analytics.register('blueprint/agent/' + id + '/pos/' + pos);
-        var agent = {id: id, parent: parent};
+    function addAgent(parent, pos, type, id)                                          {
+        if (id) analytics.register('blueprint/agent/' + type + '/' + id + '/pos/' + pos);
+        var agent = {type: type, id: id, parent: parent};
         //
         Object.defineProperty(agent, 'addRecipe',                               {
             enumerable:     false,
@@ -1569,13 +1780,19 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
     service.getItems        = function(filter) { return getFilteredByName(db, 'items',      filter); };
     service.getItem         = function(id) { return getByKey(db, 'items',       id); };
     //
+    service.getFittings     = function(filter) { return getFilteredByName(db, 'fittings',      filter); };
+    service.getFitting      = function(id) { return getByKey(db, 'fittings',    id); };
+    //
+    service.getStructures   = function(filter) { return getFilteredByName(db, 'structures',      filter); };
+    service.getStructure    = function(id) { return getByKey(db, 'structures',  id); };
+    //
     service.getSpecies      = function(filter) { return getFilteredByName(db, 'species',    filter); };
     service.getSpecie       = function(id) { return getByKey(db, 'species',     id); };
     //
     service.getBlueprints   = function(filter)  { return getFilteredByName(db, 'blueprints', filter); };
     service.getBlueprint    = function(id) { return getByKey(db, 'blueprints',  id); };
-    service.saveBlueprint   = function(data) { return saveData(db, 'blueprints',  data);};
-    service.removeBlueprint = function(id) { return removeByKey(db, 'blueprints',  id);};
+    service.saveBlueprint   = function(data) { return saveData(db, 'blueprints',    data);};
+    service.removeBlueprint = function(id) { return removeByKey(db, 'blueprints',   id);};
     //
     var db                  = null;
     //
@@ -1588,7 +1805,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         species:    false
     };
     //
-    var request             = window.indexedDB.open("gameDB", 1);
+    var request             = window.indexedDB.open("gameDB", 2);
     request.onerror         = function(event)                                   {
         // browser access to indexDB denied by the user
         console.log('DB connection failed');
@@ -1602,6 +1819,8 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         intializeStore(DBSchema, 'components');
         intializeStore(DBSchema, 'filters');
         intializeStore(DBSchema, 'items');
+        intializeStore(DBSchema, 'fittings');
+        intializeStore(DBSchema, 'structures');
         intializeStore(DBSchema, 'species');
         intializeStore(DBSchema, 'blueprints', true);
     };
@@ -1616,11 +1835,17 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         loadStore(db, 'components', 'data/components.json');
         loadStore(db, 'filters',    'data/filters.json');
         loadStore(db, 'items',      'data/items.json');
+        loadStore(db, 'fittings',   'data/fittings.json');
+        loadStore(db, 'structures', 'data/structures.json');
         loadStore(db, 'species',    'data/species.json');
     };
     //
     function intializeStore(DBSchema, name, src, auto)                          {
-        var schema                      = DBSchema.createObjectStore(name, { keyPath: "id", autoIncrement: true });
+        if (DBSchema.objectStoreNames.contains(name))                           {
+            DBSchema.deleteObjectStore(name);
+        }
+        
+        var schema      = DBSchema.createObjectStore(name, { keyPath: "id", autoIncrement: true });
         schema.createIndex("name", "name", { unique: false });
         return schema.transaction;
     }
@@ -1697,6 +1922,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         };
         request.onsuccess   = function(e)                                       {
             response.data   = request.result;
+            if (!request.result) console.log('LOAD ERROR: ', name, key);
             response.$broadcast('loaded', response.data);
         };
         //
@@ -1766,6 +1992,7 @@ trcraftingbuddy.service('store', ['observable', '$rootScope', '$location', funct
         element.blueprint       = function ()                                   {
             var params          = $location.search();
             params.type         = 'blueprint';
+            params.btype        = type;
             params.blueprint    = id;
             $location.search(params);
         };

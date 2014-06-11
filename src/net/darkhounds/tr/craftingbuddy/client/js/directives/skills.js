@@ -78,7 +78,7 @@ trcraftingbuddy.directive('skillRecipe', ['elementController', function(elementC
             controller.type         = 'recipe';
             controller.loadElement  = function()                                {
                 $scope.element  = null; if (!$scope.id) return;
-                var request     = data.getRecipe($scope.id + '');
+                var request     = data.getRecipe($scope.id);
                 request.$on('loaded', function(data)                            {
                     $scope.element = data;
                 });

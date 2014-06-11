@@ -2,9 +2,9 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', 'analytics', '$rootS
     //
     var service             = observable.create({});
     var blueprint           = {};
-    service.initialize      = function(id)                                      {
-        if (id) analytics.register('blueprint/initialize/' + id);
-        blueprint       = {id: id, parent: null};
+    service.initialize      = function(type, id)                                {
+        if (id) analytics.register('blueprint/initialize/' + type + '/' + id);
+        blueprint       = {type: type, id: id, parent: null};
         Object.defineProperty(blueprint, 'addRecipe',                           {
             enumerable:     false,
             configurable:   false,
@@ -23,22 +23,22 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', 'analytics', '$rootS
             enumerable:     false,
             configurable:   false,
             writable:       false,
-            value:          function(pos, id, filter){ return addIngredient(recipe, pos, id, filter);  }
+            value:          function(pos, type, id, filter){ return addIngredient(recipe, pos, type, id, filter);  }
         });
         Object.defineProperty(recipe, 'addAgent',                               {
             enumerable:     false,
             configurable:   false,
             writable:       false,
-            value:          function(pos, id) { return addAgent(recipe, pos, id); }
+            value:          function(pos, type, id) { return addAgent(recipe, pos, type, id); }
         });
         parent.recipe   = recipe;
         //
         return recipe;
     };
     
-    function addIngredient(parent, pos, id, filter)                             {
-        if (id) analytics.register('blueprint/ingredient/' + id + '/pos/' + pos + '/filter/' + filter);
-        var ingredient = {id: id, parent: parent, filter: filter};
+    function addIngredient(parent, pos, type, id, filter)                             {
+        if (id) analytics.register('blueprint/ingredient/' + type + '/' + id + '/pos/' + pos + '/filter/' + filter);
+        var ingredient = {type: type, id: id, parent: parent, filter: filter};
         //
         Object.defineProperty(ingredient, 'addRecipe',                          {
             enumerable:     false,
@@ -52,9 +52,9 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', 'analytics', '$rootS
         
     }
     
-    function addAgent(parent, pos, id)                                          {
-        if (id) analytics.register('blueprint/agent/' + id + '/pos/' + pos);
-        var agent = {id: id, parent: parent};
+    function addAgent(parent, pos, type, id)                                          {
+        if (id) analytics.register('blueprint/agent/' + type + '/' + id + '/pos/' + pos);
+        var agent = {type: type, id: id, parent: parent};
         //
         Object.defineProperty(agent, 'addRecipe',                               {
             enumerable:     false,
