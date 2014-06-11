@@ -7,7 +7,7 @@ trcraftingbuddy.directive('viewport', [function()                               
             $scope.type         = $location.search().type || 'skill';
             
             analytics.auto = true;
-            // analytics.initialize('UA-51275210-2', 'darkhounds.net');
+            analytics.initialize('UA-51275210-2', 'darkhounds.net');
             
             $scope.$watch('type', function(nv)                                  {
                 switch (nv.toLowerCase())                                       {
