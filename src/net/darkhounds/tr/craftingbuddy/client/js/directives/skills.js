@@ -60,6 +60,7 @@ trcraftingbuddy.directive('skills', [function()                                 
                         
                         console.log('... loaded', $scope.elements.length)
                     }
+                    setTimeout(function(){ $scope.$digest(); });
                 });
             }
             //
