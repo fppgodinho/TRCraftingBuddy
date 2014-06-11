@@ -3,7 +3,7 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', 'analytics', '$rootS
     var service             = observable.create({});
     var blueprint           = {};
     service.initialize      = function(id)                                      {
-        analytics.register('blueprint/initialize/' + (id || 'new'));
+        analytics.register('blueprint/initialize/' + (id || 'New'));
         blueprint       = {id: id, parent: null};
         Object.defineProperty(blueprint, 'addRecipe',                           {
             enumerable:     false,
