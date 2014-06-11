@@ -103,8 +103,11 @@ tasks.push(function(callback)                                                   
 
 function expandComponent(component)                                             {
     tasks.push(function(callback)                                               {
-        db.each("SELECT * FROM Item_Crafting_Components WHERE componentID ='" + component.id + "'", function (err, row) {
+        db.each("SELECT Items.itemID FROM Item_Crafting_Components" +
+            " LEFT JOIN Items ON (Item_Crafting_Components.itemID == Items.itemID)" +
+            " WHERE Items.itemID IS NOT NULL AND Item_Crafting_Components.componentID ='" + component.id + "'", function (err, row) {
             component.items.push(row.itemID);
+            console.log(row.itemID);
         }, function(){ callback(null); });
     });
     tasks.push(function(callback)                                               {
@@ -212,7 +215,7 @@ function checkStructureType(structure)                                          
     structure.craftable = (structure.resultOf.length > 0);
 }
 
-//*
+/*
 tasks.push(function(callback)                                                   {
     db.each("SELECT * FROM Items", function(err, row)                           {
         items[row.itemID]   = {
@@ -229,7 +232,6 @@ tasks.push(function(callback)                                                   
         expandItem(items[row.itemID]);
     }, function(){ callback(null); });
 });
-
 
 function expandItem(item)                                                       {
     tasks.push(function(callback)                                               {
@@ -286,6 +288,6 @@ async.whilst(function() { return (count < tasks.length);}, function(callback)   
     saveFile('species.json',    species);
     saveFile('fittings.json',   fittings);
     saveFile('structures.json', structures);
-    saveFile('items.json',      items);
-})
+    // saveFile('items.json',      items);
+});
 

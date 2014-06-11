@@ -335,13 +335,17 @@ trcraftingbuddy.directive('blueprintsRecipeIngredient', ['blueprintController', 
                 $scope.items.push({name: '-'});
                 $scope.item = $scope.items[0];
                 
-                var items   = $scope.filter?$scope.filter.items:$scope.component.items;
+                if ($scope.filter) console.log($scope.component.items, $scope.filter.items);
+                // var items   = $scope.filter?$scope.filter.items:$scope.component.items;
+                var items   = $scope.component.items
                 
-                for (var i in items) controller.addLoadEventRemover(
-                    controller.data.getItem(+items[i]).$on('loaded', function(dataItem){
-                        $scope.items.push(dataItem);
-                    })
-                );
+                for (var i in items)                                            {
+                    if (!$scope.filter || $scope.filter.items.indexOf(items[i]) > -1) controller.addLoadEventRemover(
+                        controller.data.getItem(+items[i]).$on('loaded', function(dataItem){
+                            $scope.items.push(dataItem);
+                        })
+                    );
+                }
             }
         }]
     }
@@ -1400,7 +1404,7 @@ trcraftingbuddy.directive('viewport', [function()                               
             $scope.type         = $location.search().type || 'skill';
             
             analytics.auto = true;
-            // analytics.initialize('UA-51275210-2', 'darkhounds.net');
+            analytics.initialize('UA-51275210-2', 'darkhounds.net');
             
             $scope.$watch('type', function(nv)                                  {
                 switch (nv.toLowerCase())                                       {
