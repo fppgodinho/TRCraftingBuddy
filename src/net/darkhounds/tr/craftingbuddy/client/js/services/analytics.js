@@ -44,7 +44,6 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
     $rootScope.$on('$locationChangeStart', function()                           {
         if (!initialized || !service.auto) return;
         service.register($location.absUrl());
-        
     });
     
     return service;

@@ -1463,17 +1463,17 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
     $rootScope.$on('$locationChangeStart', function()                           {
         if (!initialized || !service.auto) return;
         service.register($location.absUrl());
-        
     });
     
     return service;
 }]);
 
-trcraftingbuddy.service('blueprint', ['observable', 'data', '$rootScope', function(observable, data, $rootScope) {
+trcraftingbuddy.service('blueprint', ['observable', 'data', 'analytics', '$rootScope', function(observable, data, analytics, $rootScope) {
     //
     var service             = observable.create({});
     var blueprint           = {};
     service.initialize      = function(id)                                      {
+        analytics.register('blueprint/initialize/' + id);
         blueprint       = {id: id, parent: null};
         Object.defineProperty(blueprint, 'addRecipe',                           {
             enumerable:     false,
@@ -1486,6 +1486,7 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', '$rootScope', functi
     };
     
     function addRecipe (parent, id)                                             {
+        analytics.register('blueprint/recipe/' + id);
         var recipe      = {id: id, parent: parent, ingredients:[], agents:[]};
         //
         Object.defineProperty(recipe, 'addIngredient',                          {
@@ -1506,6 +1507,7 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', '$rootScope', functi
     };
     
     function addIngredient(parent, pos, id, filter)                             {
+        analytics.register('blueprint/ingredient/' + id + '/pos/' + pos + '/filter/' + filter);
         var ingredient = {id: id, parent: parent, filter: filter};
         //
         Object.defineProperty(ingredient, 'addRecipe',                          {
@@ -1521,6 +1523,7 @@ trcraftingbuddy.service('blueprint', ['observable', 'data', '$rootScope', functi
     }
     
     function addAgent(parent, pos, id)                                          {
+        analytics.register('blueprint/agent/' + id + '/pos/' + pos + '/filter/' + filter);
         var agent = {id: id, parent: parent};
         //
         Object.defineProperty(agent, 'addRecipe',                               {
