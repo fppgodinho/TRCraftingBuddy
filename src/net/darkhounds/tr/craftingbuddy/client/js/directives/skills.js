@@ -7,9 +7,9 @@ trcraftingbuddy.directive('skills', [function()                                 
             var type            = 'skill';
             var params          = $location.search();
             $scope.selected     = false;
-            $scope.test     = [];
+            $scope.elements     = [];
             $scope.craftingOnly = !params.crafting || params.crafting == '1';
-            $scope.search       = '';
+            $scope.search       = 'ligase';
             $scope.store        = function()                                    {
                 if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
             };
@@ -17,9 +17,9 @@ trcraftingbuddy.directive('skills', [function()                                 
             $scope.$on('$locationChangeStart', function(nv)                     {
                 var params          = $location.search();
                 $scope.craftingOnly = params.crafting == '1';
-                for (var i in $scope.test)
-                    if ($scope.test[i].id == params[type])
-                        $scope.selected = $scope.test[i];
+                for (var i in $scope.elements)
+                    if ($scope.elements[i].id == params[type])
+                        $scope.selected = $scope.elements[i];
             });
             //
             $scope.$watch('selected', function(nv)                              {
@@ -48,19 +48,18 @@ trcraftingbuddy.directive('skills', [function()                                 
             function getData()                                                  {
                 console.log('Skills Data load...')
                 data.getSkills($scope.search).$on('loaded', function(data)      {
-                    $scope.test.length  = 0;
+                    $scope.elements.length  = 0;
                     var list                = data || [];
                     var params              = $location.search();
                     for (var i in list)                                         {
                         if ($scope.craftingOnly && (!list[i].recipes || !list[i].recipes.length)) continue;
                         
-                        $scope.test.push(list[i]);
-                        if ((($scope.search || !params[type]) && $scope.test.length == 1) || (params.type == type && params[type] == list[i].id))
+                        $scope.elements.push(list[i]);
+                        if ((($scope.search || !params[type]) && $scope.elements.length == 1) || (params.type == type && params[type] == list[i].id))
                             $scope.selected = list[i];
                         
-                        console.log('... loaded', $scope.test.length)
+                        console.log('... loaded', $scope.elements.length)
                     }
-                    setTimeout(function(){ $scope.$digest(); });
                 });
             }
             //
