@@ -1189,7 +1189,10 @@ trcraftingbuddy.directive('viewport', [function()                               
         controller:     ['$scope', '$location', 'data', 'analytics', 'store', function($scope, $location, data, analytics, store) {
             $scope.ready        = false;
             $scope.type         = $location.search().type || 'skill';
-
+            
+            analytics.auto = true;
+            analytics.initialize('UA-51275210-2', 'darkhounds.net');
+            
             $scope.$watch('type', function(nv)                                  {
                 switch (nv.toLowerCase())                                       {
                     case 'recipe':      $scope.type = 'recipe';     break;
@@ -1443,6 +1446,7 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
         })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
         ga('create', key, domain);
         //
+        console.log('---->', key, domain);
         initialized = true;
     };
 
@@ -1452,6 +1456,7 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
      */
     service.register = function(path)                                           {
         $window.ga('send', 'pageview', path);
+        console.log('---->', path, $window.ga);
     };
 
     /**
@@ -1460,6 +1465,7 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
     $rootScope.$on('$locationChangeStart', function()                           {
         if (!initialized || !service.auto) return;
         service.register($location.absUrl());
+        
     });
     
     return service;
