@@ -50,7 +50,6 @@ trcraftingbuddy.directive('skills', [function()                                 
                 data.getSkills($scope.search).$on('loaded', function(data)      {
                     $scope.elements.length  = 0;
                     var list                = data || [];
-                    console.log('... loaded', list.length)
                     var params              = $location.search();
                     for (var i in list)                                         {
                         if ($scope.craftingOnly && (!list[i].recipes || !list[i].recipes.length)) continue;
@@ -58,6 +57,8 @@ trcraftingbuddy.directive('skills', [function()                                 
                         $scope.elements.push(list[i]);
                         if ((($scope.search || !params[type]) && $scope.elements.length == 1) || (params.type == type && params[type] == list[i].id))
                             $scope.selected = list[i];
+                        
+                        console.log('... loaded', $scope.elements.length)
                     }
                 });
             }
