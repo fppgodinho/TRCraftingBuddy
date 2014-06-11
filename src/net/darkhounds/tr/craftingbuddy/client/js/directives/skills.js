@@ -9,7 +9,7 @@ trcraftingbuddy.directive('skills', [function()                                 
             $scope.selected     = false;
             $scope.elements     = [];
             $scope.craftingOnly = !params.crafting || params.crafting == '1';
-            $scope.search       = 'ligase';
+            $scope.search       = '';
             $scope.store        = function()                                    {
                 if (type && $scope.selected) store.add(type, $scope.selected?$scope.selected.id:0);
             };
