@@ -27,7 +27,6 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
         })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
         ga('create', key, domain);
         //
-        console.log('---->', key, domain);
         initialized = true;
     };
 
@@ -37,7 +36,6 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
      */
     service.register = function(path)                                           {
         $window.ga('send', 'pageview', path);
-        console.log('---->', path, $window.ga);
     };
 
     /**

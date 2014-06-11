@@ -1446,7 +1446,6 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
         })(window, document, 'script', '//www.google-analytics.com/analytics.js', 'ga');
         ga('create', key, domain);
         //
-        console.log('---->', key, domain);
         initialized = true;
     };
 
@@ -1456,7 +1455,6 @@ trcraftingbuddy.service('analytics', ['$rootScope', '$location', '$window', func
      */
     service.register = function(path)                                           {
         $window.ga('send', 'pageview', path);
-        console.log('---->', path, $window.ga);
     };
 
     /**
@@ -1630,6 +1628,7 @@ trcraftingbuddy.service('data', ['$rootScope', '$http', '$window', 'observable',
         var store               = DBSchema.transaction([name]).objectStore(name);
         
         store.count().onsuccess = function(e)                                   {
+            console.log(name, e.target.result);
             if (!e.target.result) return $http({method: 'GET', url: src}).success(function(data) {
                 var store               = DBSchema.transaction([name], "readwrite").objectStore(name);
                 var count               = 0;
