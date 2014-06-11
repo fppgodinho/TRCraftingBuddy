@@ -330,10 +330,7 @@ trcraftingbuddy.directive('blueprintsRecipeIngredient', ['blueprintController', 
                 $scope.items.push({name: '-'});
                 $scope.item = $scope.items[0];
                 
-                if ($scope.filter) console.log($scope.component.items, $scope.filter.items);
-                // var items   = $scope.filter?$scope.filter.items:$scope.component.items;
                 var items   = $scope.component.items
-                
                 for (var i in items)                                            {
                     if (!$scope.filter || $scope.filter.items.indexOf(items[i]) > -1) controller.addLoadEventRemover(
                         controller.data.getItem(+items[i]).$on('loaded', function(dataItem){
