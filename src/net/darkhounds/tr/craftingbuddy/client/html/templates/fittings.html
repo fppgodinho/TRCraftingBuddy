@@ -1,0 +1,21 @@
+<div class="fittings">
+    <div class="header">
+        <div class="field">Fittings: {{elements.length}}</div>
+        <button class="store" data-ng-disabled="!selected" data-ng-click="store()">+</button>
+        <select data-ng-model="selected" data-ng-options="element.name for element in elements"></select>
+        <input data-ng-model="search" placeholder="filter" />
+        <input id="CRAFTED" data-ng-model="crafted" type="checkbox"/>
+        <label for="CRAFTED">Crafted</label>
+    </div>
+    <div style="height:65px">
+        <div class="field">ID: {{selected.id}}</div>
+        <div class="field">Name: {{selected.name}}
+            (
+            <span data-ng-repeat="id in selected.resultOf">
+                <span class="field" data-fitting-recipe data-id="id"></span>
+            </span>
+            )
+        </div>
+        <div class="field">Description: {{selected.description}}</div>
+    </div>
+</div>

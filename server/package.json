@@ -1,0 +1,15 @@
+{
+  "name": "Server",
+  "version": "0.0.0",
+  "description": "Server for TRCraftingBuddy",
+  "main": "parsedata.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "Fernando Pedro Pereira Godinho <fppgodinho@gmail.com>",
+  "license": "ISC",
+  "dependencies": {
+    "sqlite3": "^2.2.3",
+    "async": "^0.9.0"
+  }
+}
