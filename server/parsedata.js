@@ -107,7 +107,6 @@ function expandComponent(component)                                             
             " LEFT JOIN Items ON (Item_Crafting_Components.itemID == Items.itemID)" +
             " WHERE Items.itemID IS NOT NULL AND Item_Crafting_Components.componentID ='" + component.id + "'", function (err, row) {
             component.items.push(row.itemID);
-            console.log(row.itemID);
         }, function(){ callback(null); });
     });
     tasks.push(function(callback)                                               {
@@ -215,7 +214,7 @@ function checkStructureType(structure)                                          
     structure.craftable = (structure.resultOf.length > 0);
 }
 
-/*
+//*
 tasks.push(function(callback)                                                   {
     db.each("SELECT * FROM Items", function(err, row)                           {
         items[row.itemID]   = {
@@ -288,6 +287,6 @@ async.whilst(function() { return (count < tasks.length);}, function(callback)   
     saveFile('species.json',    species);
     saveFile('fittings.json',   fittings);
     saveFile('structures.json', structures);
-    // saveFile('items.json',      items);
+    saveFile('items.json',      items);
 });
 
